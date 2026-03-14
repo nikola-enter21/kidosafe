@@ -1,9 +1,12 @@
+from django.urls import path
 from rest_framework.routers import DefaultRouter
-from .views import CategoryViewSet, ScenarioViewSet, ChoiceViewSet
+from .views import CategoryViewSet, ScenarioViewSet, ChoiceViewSet, GetDescriptionsView
 
 router = DefaultRouter()
 router.register(r'categories', CategoryViewSet, basename='category')
 router.register(r'scenarios',  ScenarioViewSet,  basename='scenario')
 router.register(r'choices',    ChoiceViewSet,    basename='choice')
 
-urlpatterns = router.urls
+urlpatterns = router.urls + [
+    path('get_descriptions', GetDescriptionsView.as_view(), name='get-descriptions'),
+]

@@ -2,6 +2,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from .models import Category, Scenario, Choice, _choice_id
 from .serializers import (
@@ -188,3 +189,24 @@ class ChoiceViewSet(viewsets.ModelViewSet):
         choice = Choice.objects.create(scenario=scenario, **vd)
         out = ChoiceSerializer(choice)
         return Response(out.data, status=status.HTTP_201_CREATED)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Descriptions
+# ─────────────────────────────────────────────────────────────────────────────
+
+class GetDescriptionsView(APIView):
+    """
+    GET /api/get_descriptions
+    Returns two parallel arrays: id_material (scenario IDs) and description.
+    """
+    def get(self, request):
+        qs = Scenario.objects.values_list('id', 'description').order_by('id')
+        if qs:
+            id_material, descriptions = zip(*qs)
+        else:
+            id_material, descriptions = [], []
+        return Response({
+            'id_material': list(id_material),
+            'description': list(descriptions),
+        })
