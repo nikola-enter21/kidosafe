@@ -5,14 +5,14 @@ export interface Choice {
   text: string
   emoji: string
   isCorrect: boolean
-  feedback: string        // показва се след избора
+  feedback: string
   feedbackEmoji: string
 }
 
 export interface SceneConfig {
   background: string
   emoji: string
-  label: string           // кратко описание на сцената
+  label: string
 }
 
 export interface Scenario {
