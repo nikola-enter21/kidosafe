@@ -46,7 +46,7 @@ export function GamePage() {
         ? currentScenario.correctVideoUrl
         : currentScenario.wrongVideoUrl
       : currentScenario.questionVideoUrl
-    : currentScenario.videoUrl
+    : undefined
   const shouldPauseScene = isTripletVideoScenario
     ? choicesUnlocked && !isAnswered
     : choicesUnlocked || isAnswered

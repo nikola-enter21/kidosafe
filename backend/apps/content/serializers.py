@@ -55,26 +55,21 @@ class ScenarioSerializer(serializers.ModelSerializer):
     Full CRUD serializer for Scenario with nested choices and scene config.
 
     Mapping:
-      watch_time  ↔  watchTime
-      video_url   ↔  videoUrl
-      image_url   ↔  imageUrl
-      scene_*     ↔  scene: { background, emoji, label }
+      watch_time         ↔  watchTime
+      question_video_url ↔  questionVideoUrl
+      correct_video_url  ↔  correctVideoUrl
+      wrong_video_url    ↔  wrongVideoUrl
+      scene_*            ↔  scene: { background, emoji, label }
     """
     watchTime = serializers.IntegerField(source='watch_time', required=False, default=4)
-    videoUrl = serializers.CharField(
-        source='video_url', required=False, allow_blank=True, default=''
+    questionVideoUrl = serializers.CharField(
+        source='question_video_url', required=False, allow_blank=True, default=''
     )
-    imageUrl = serializers.CharField(
-        source='image_url', required=False, allow_blank=True, default=''
+    correctVideoUrl = serializers.CharField(
+        source='correct_video_url', required=False, allow_blank=True, default=''
     )
-    followUpVideoUrl = serializers.CharField(
-        source='follow_up_video_url', required=False, allow_blank=True, default=''
-    )
-    followUpImageUrl = serializers.CharField(
-        source='follow_up_image_url', required=False, allow_blank=True, default=''
-    )
-    followUpCaption = serializers.CharField(
-        source='follow_up_caption', required=False, allow_blank=True, default=''
+    wrongVideoUrl = serializers.CharField(
+        source='wrong_video_url', required=False, allow_blank=True, default=''
     )
     choices = ChoiceSerializer(many=True, required=False)
 
@@ -82,8 +77,7 @@ class ScenarioSerializer(serializers.ModelSerializer):
         model = Scenario
         fields = [
             'id', 'category', 'question', 'watchTime', 'tip',
-            'videoUrl', 'imageUrl',
-            'followUpVideoUrl', 'followUpImageUrl', 'followUpCaption',
+            'questionVideoUrl', 'correctVideoUrl', 'wrongVideoUrl',
             'choices',
         ]
         extra_kwargs = {
@@ -158,19 +152,16 @@ class ScenarioSerializer(serializers.ModelSerializer):
 class ScenarioListSerializer(serializers.ModelSerializer):
     """Compact serializer used in list views to avoid N+1 on choices."""
     watchTime = serializers.IntegerField(source='watch_time')
-    videoUrl = serializers.CharField(source='video_url', allow_blank=True)
-    imageUrl = serializers.CharField(source='image_url', allow_blank=True)
-    followUpVideoUrl = serializers.CharField(source='follow_up_video_url', allow_blank=True)
-    followUpImageUrl = serializers.CharField(source='follow_up_image_url', allow_blank=True)
-    followUpCaption = serializers.CharField(source='follow_up_caption', allow_blank=True)
+    questionVideoUrl = serializers.CharField(source='question_video_url', allow_blank=True)
+    correctVideoUrl = serializers.CharField(source='correct_video_url', allow_blank=True)
+    wrongVideoUrl = serializers.CharField(source='wrong_video_url', allow_blank=True)
     choiceCount = serializers.SerializerMethodField()
 
     class Meta:
         model = Scenario
         fields = [
             'id', 'category', 'question', 'watchTime', 'tip',
-            'videoUrl', 'imageUrl',
-            'followUpVideoUrl', 'followUpImageUrl', 'followUpCaption',
+            'questionVideoUrl', 'correctVideoUrl', 'wrongVideoUrl',
             'choiceCount', 'order',
         ]
 
