@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install framer-motion zustand react-router-dom canvas-confetti ky swr lodash clsx tailwind-merge class-variance-authority @types/lodash @types/canvas-confetti @types/react-router-dom)",
+      "Bash(/c/Users/Az/Documents/Github/kidosafe/frontend/src/entities/game/hooks/useTimer.ts:*)",
+      "Bash(__NEW_LINE_9481e7a51f094895__ cat)",
+      "Bash(/c/Users/Az/Documents/Github/kidosafe/frontend/src/shared/lib/sounds.ts:*)",
+      "Bash(/c/Users/Az/Documents/Github/kidosafe/frontend/src/entities/game/hooks/useSound.ts:*)",
+      "Bash(__NEW_LINE_9481e7a51f094895__ echo \"✅ useTimer + sounds + useSound written\")",
+      "Bash(/c/Users/Az/Documents/Github/kidosafe/package.json:*)",
+      "Bash(/c/Users/Az/Documents/Github/kidosafe/frontend/src/entities/scenario/ui/SceneDisplay.tsx:*)",
+      "Bash(/c/Users/Az/Documents/Github/kidosafe/frontend/src/widgets/category-grid/CategoryGrid.tsx:*)",
+      "Bash(/c/Users/Az/Documents/Github/kidosafe/frontend/src/pages/categories/ui/CategoriesPage.tsx:*)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(npx tsc --noEmit)",
+      "Bash(node -e \"const p = require\\(''./node_modules/@mui/material/package.json''\\); console.log\\(''MUI:'', p.version\\)\")",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(npm run build)"
+    ]
+  }
+}
