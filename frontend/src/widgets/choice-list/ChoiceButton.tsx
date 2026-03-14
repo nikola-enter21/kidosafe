@@ -73,11 +73,11 @@ export function ChoiceButton({ choice, state, onClick }: ChoiceButtonProps) {
           '&:hover': isClickable ? { boxShadow: s.hoverShadow } : {},
         }}
       >
-        <Typography
-          sx={{ fontSize: { xs: '1.6rem', md: '1.9rem' }, lineHeight: 1, flexShrink: 0 }}
-        >
-          {choice.emoji}
-        </Typography>
+        {/*<Typography*/}
+        {/*  sx={{ fontSize: { xs: '1.6rem', md: '1.9rem' }, lineHeight: 1, flexShrink: 0 }}*/}
+        {/*>*/}
+        {/*  {choice.emoji}*/}
+        {/*</Typography>*/}
         <Typography
           sx={{
             fontWeight: 700,

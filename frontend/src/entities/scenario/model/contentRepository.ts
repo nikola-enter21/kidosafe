@@ -18,17 +18,54 @@ import {
 
 const CATEGORY_IDS = CATEGORIES.map(c => c.id) as CategoryId[]
 
+function normalizeScenarioOrder(scenario: Scenario, index: number): Scenario {
+  return {
+    ...scenario,
+    order: Number.isFinite(scenario.order) ? scenario.order : index,
+  }
+}
+
+function normalizeDatasetOrders(dataset: ContentDataset): ContentDataset {
+  return {
+    ...dataset,
+    categories: [...CATEGORY_IDS],
+    scenariosByCategory: {
+      'home-alone': (dataset.scenariosByCategory['home-alone'] ?? []).map((scenario, index) => ({
+        ...scenario,
+        order: index,
+      })),
+      stranger: (dataset.scenariosByCategory.stranger ?? []).map((scenario, index) => ({
+        ...scenario,
+        order: index,
+      })),
+      internet: (dataset.scenariosByCategory.internet ?? []).map((scenario, index) => ({
+        ...scenario,
+        order: index,
+      })),
+      school: (dataset.scenariosByCategory.school ?? []).map((scenario, index) => ({
+        ...scenario,
+        order: index,
+      })),
+    },
+  }
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Game helpers
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function getScenariosByCategory(categoryId: CategoryId): Promise<Scenario[]> {
-  return getCategoryScenarios(categoryId)
+  const scenarios = await getCategoryScenarios(categoryId)
+  return scenarios.map(normalizeScenarioOrder)
 }
 
 export async function getScenarioById(id: string): Promise<Scenario | undefined> {
   try {
-    return await getScenarioFromApi(id)
+    const scenario = await getScenarioFromApi(id)
+    return {
+      ...scenario,
+      order: Number.isFinite(scenario.order) ? scenario.order : 0,
+    }
   } catch {
     return undefined
   }
@@ -50,16 +87,16 @@ export async function getTotalScenarioCount(): Promise<number> {
 
 export async function getActiveDataset(): Promise<ContentDataset> {
   const exported = await exportDatasetFromApi()
-  return {
+  return normalizeDatasetOrders({
     version: 1,
     categories: [...CATEGORY_IDS],
     scenariosByCategory: {
-      'home-alone': exported.scenariosByCategory['home-alone'] ?? [],
-      stranger: exported.scenariosByCategory['stranger'] ?? [],
-      internet: exported.scenariosByCategory['internet'] ?? [],
-      school: exported.scenariosByCategory['school'] ?? [],
+      'home-alone': (exported.scenariosByCategory['home-alone'] ?? []).map(normalizeScenarioOrder),
+      stranger: (exported.scenariosByCategory['stranger'] ?? []).map(normalizeScenarioOrder),
+      internet: (exported.scenariosByCategory['internet'] ?? []).map(normalizeScenarioOrder),
+      school: (exported.scenariosByCategory['school'] ?? []).map(normalizeScenarioOrder),
     },
-  }
+  })
 }
 
 export async function exportDataset(): Promise<string> {
@@ -68,6 +105,8 @@ export async function exportDataset(): Promise<string> {
 }
 
 export async function saveDataset(dataset: ContentDataset): Promise<void> {
+  const normalizedDataset = normalizeDatasetOrders(dataset)
+
   // Fetch current backend state to diff against
   const current = await exportDatasetFromApi()
 
@@ -80,7 +119,7 @@ export async function saveDataset(dataset: ContentDataset): Promise<void> {
 
   const newIds = new Set<string>()
   for (const catId of CATEGORY_IDS) {
-    for (const s of dataset.scenariosByCategory[catId] ?? []) {
+    for (const s of normalizedDataset.scenariosByCategory[catId] ?? []) {
       newIds.add(s.id)
     }
   }
@@ -94,7 +133,7 @@ export async function saveDataset(dataset: ContentDataset): Promise<void> {
 
   // Create new or update existing scenarios
   for (const catId of CATEGORY_IDS) {
-    const scenarios = dataset.scenariosByCategory[catId] ?? []
+    const scenarios = normalizedDataset.scenariosByCategory[catId] ?? []
     for (const scenario of scenarios) {
       if (backendIds.has(scenario.id)) {
         await updateScenarioApi(scenario.id, scenario)
@@ -137,7 +176,7 @@ export async function importDataset(jsonText: string): Promise<ContentImportResu
         school: (Array.isArray(sbC['school']) ? sbC['school'] : []) as Scenario[],
       },
     }
-    await saveDataset(dataset)
+    await saveDataset(normalizeDatasetOrders(dataset))
     return { ok: true }
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : 'Failed to import dataset.' }
