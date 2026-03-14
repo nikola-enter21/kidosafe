@@ -7,7 +7,7 @@ from embedding import *
 from agent import *
 from env import *
 from typing import Dict
-import scipy
+from agent import *
 
 app = FastAPI(title="KidoSafe AI Service", description="API for AI backend communication", port=5467)
 temperature = 0.2
@@ -21,16 +21,38 @@ class UserRation(BaseModel):
 def read_root():
     return {"status": "ok", "message": "AI Service is running"}
 
-@app.post("/{category}/generate_scenario")
-def generate_scenario(category: str, message: Message):
-    
-    # TODO: Implement scenario generation logic
-    return {
-        "status": "success",
-        "result": "Scenario generated successfully",
-        "original_text": message.text
-    }
+@app.post("/api/categories/{category}/generate_scenario")
+def generate_scenario(category: str):
+    generated_quiz = generate_safety_quiz(category)
 
+    rel_doc = get_most_relevant_materials(generated_quiz.get("scenario"), top_k=1)
+
+    if not rel_doc:
+        image_prompts = generate_image_prompts(generated_quiz.get("scenario"), 
+                                               generated_quiz.get("context"), 
+                                               generated_quiz.get("answers"), 
+                                               generated_quiz.get("correct_answer"))
+        
+        return {
+            "id_material": None,
+            "question": generated_quiz.get("question"),
+            "answers": generated_quiz.get("answers"),
+            "correct_answer": generated_quiz.get("correct_answer"),
+            "question_image_prompt": image_prompts.get("question_image_prompt"),
+            "success_image_prompt": image_prompts.get("success_image_prompt"),
+            "failure_image_prompt": image_prompts.get("failure_image_prompt"),
+        }
+    
+    return {
+        "id_material": rel_doc[0][0],
+        "question": generated_quiz.get("question"),
+        "answers": generated_quiz.get("answers"),
+        "correct_answer": generated_quiz.get("correct_answer"),
+        "question_image_prompt": None,
+        "success_image_prompt": None,
+        "failure_image_prompt": None
+    }
+    
 @app.post("/get_next_category")
 def get_next_category(ratio: UserRation):
     dict_ratio = ratio.ratio

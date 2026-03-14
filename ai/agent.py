@@ -12,6 +12,11 @@ class SafetyQuiz(BaseModel):
     correct_answer: int
     context: str
 
+class ImagePrompts(BaseModel):
+    question_image_prompt: str
+    success_image_prompt: str
+    failure_image_prompt: str
+
 def generate_safety_quiz(topic: str) -> dict:
     """
     Generates a child safety quiz scenario for the given topic
@@ -181,13 +186,6 @@ def generate_safety_quiz_continuation(
     except json.JSONDecodeError as e:
         raise ValueError(f"Failed to parse model output as JSON: {e}\nRaw output:\n{raw_text}")
 
-
-class ImagePrompts(BaseModel):
-    question_image_prompt: str
-    success_image_prompt: str
-    failure_image_prompt: str
-
-
 def generate_image_prompts(
     situation: str,
     context: str,
@@ -282,32 +280,32 @@ def generate_image_prompts(
         raise ValueError(f"Failed to parse model output as JSON: {e}\nRaw output:\n{raw_text}")
 
 
-if __name__ == "__main__":
-    topic = "Online interactions"
+# if __name__ == "__main__":
+#     topic = "Online interactions"
 
-    # Step 1: generate the opening scenario
-    print(f"Step 1 — Generating opening quiz for topic: '{topic}'\n")
-    opening = generate_safety_quiz(topic)
-    print(json.dumps(opening, indent=2))
+#     # Step 1: generate the opening scenario
+#     print(f"Step 1 — Generating opening quiz for topic: '{topic}'\n")
+#     opening = generate_safety_quiz(topic)
+#     print(json.dumps(opening, indent=2))
 
-    # Step 2: use the correct answer to continue the story
-    correct_answer = opening["answers"][opening["correct_answer"]]
-    print(f"\nStep 2 — Continuing with correct answer: '{correct_answer}'\n")
+#     # Step 2: use the correct answer to continue the story
+#     correct_answer = opening["answers"][opening["correct_answer"]]
+#     print(f"\nStep 2 — Continuing with correct answer: '{correct_answer}'\n")
 
-    continuation = generate_safety_quiz_continuation(
-        topic=topic,
-        situation=opening["scenario"],
-        response=correct_answer,
-        context=opening["context"],
-    )
-    print(json.dumps(continuation, indent=2))
+#     continuation = generate_safety_quiz_continuation(
+#         topic=topic,
+#         situation=opening["scenario"],
+#         response=correct_answer,
+#         context=opening["context"],
+#     )
+#     print(json.dumps(continuation, indent=2))
 
-    # Step 3: generate image prompts for the continuation scenario
-    print(f"\nStep 3 — Generating image prompts\n")
-    image_prompts = generate_image_prompts(
-        situation=continuation["scenario"],
-        context=continuation["context"],
-        answers=continuation["answers"],
-        correct_answer=continuation["correct_answer"],
-    )
-    print(json.dumps(image_prompts, indent=2, ensure_ascii=False))
+#     # Step 3: generate image prompts for the continuation scenario
+#     print(f"\nStep 3 — Generating image prompts\n")
+#     image_prompts = generate_image_prompts(
+#         situation=continuation["scenario"],
+#         context=continuation["context"],
+#         answers=continuation["answers"],
+#         correct_answer=continuation["correct_answer"],
+#     )
+#     print(json.dumps(image_prompts, indent=2, ensure_ascii=False))
