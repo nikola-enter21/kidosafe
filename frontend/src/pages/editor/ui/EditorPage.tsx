@@ -24,11 +24,14 @@ import type { CategoryId } from '@/shared/types/game'
 
 const CATEGORY_IDS = CATEGORIES.map(c => c.id) as CategoryId[]
 
-type VideoField =
+type MediaField =
   | 'videoUrl'
   | 'questionVideoUrl'
   | 'wrongVideoUrl'
   | 'correctVideoUrl'
+  | 'imageUrl'
+  | 'imageUrlCorrect'
+  | 'imageUrlWrong'
 
 function cloneDataset(dataset: ContentDataset): ContentDataset {
   return JSON.parse(JSON.stringify(dataset)) as ContentDataset
@@ -99,7 +102,6 @@ export function EditorPage() {
   const [message, setMessage] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // Load initial dataset from backend
   useEffect(() => {
     getActiveDataset()
       .then(data => {
@@ -149,7 +151,7 @@ export function EditorPage() {
     )
   }
 
-  const updateOptionalVideoField = (field: VideoField, rawValue: string) => {
+  const updateOptionalMediaField = (field: MediaField, rawValue: string) => {
     updateSelectedScenario(item => {
       const value = rawValue.trim()
       if (value) {
@@ -517,7 +519,7 @@ export function EditorPage() {
                 label="Video URL / Path"
                 placeholder="/videos/my-video.mp4 or https://..."
                 value={selectedScenario.videoUrl ?? ''}
-                onChange={event => updateOptionalVideoField('videoUrl', event.target.value)}
+                onChange={event => updateOptionalMediaField('videoUrl', event.target.value)}
                 fullWidth
                 sx={{
                   '& .MuiInputBase-root': { color: '#fff', bgcolor: 'rgba(255,255,255,0.03)' },
@@ -532,7 +534,7 @@ export function EditorPage() {
                 label="Question video URL / Path (part_1)"
                 placeholder="/homealone/kontakt/new_style_part_1.mp4"
                 value={selectedScenario.questionVideoUrl ?? ''}
-                onChange={event => updateOptionalVideoField('questionVideoUrl', event.target.value)}
+                onChange={event => updateOptionalMediaField('questionVideoUrl', event.target.value)}
                 fullWidth
                 sx={{
                   '& .MuiInputBase-root': { color: '#fff', bgcolor: 'rgba(255,255,255,0.03)' },
@@ -543,7 +545,7 @@ export function EditorPage() {
                 label="Wrong answer video URL / Path (part_2)"
                 placeholder="/homealone/kontakt/new_style_part_2.mp4"
                 value={selectedScenario.wrongVideoUrl ?? ''}
-                onChange={event => updateOptionalVideoField('wrongVideoUrl', event.target.value)}
+                onChange={event => updateOptionalMediaField('wrongVideoUrl', event.target.value)}
                 fullWidth
                 sx={{
                   '& .MuiInputBase-root': { color: '#fff', bgcolor: 'rgba(255,255,255,0.03)' },
@@ -554,7 +556,7 @@ export function EditorPage() {
                 label="Correct answer video URL / Path (part_3)"
                 placeholder="/homealone/kontakt/new_style_part_3.mp4"
                 value={selectedScenario.correctVideoUrl ?? ''}
-                onChange={event => updateOptionalVideoField('correctVideoUrl', event.target.value)}
+                onChange={event => updateOptionalMediaField('correctVideoUrl', event.target.value)}
                 fullWidth
                 sx={{
                   '& .MuiInputBase-root': { color: '#fff', bgcolor: 'rgba(255,255,255,0.03)' },
@@ -563,6 +565,67 @@ export function EditorPage() {
               />
               <Typography sx={{ color: 'rgba(255,255,255,0.62)', fontSize: '0.78rem', mt: -1 }}>
                 Triplet video flow requires all 3 fields: question + wrong + correct.
+              </Typography>
+
+              {/* ── Description ───────────────────────────────────────── */}
+              <TextField
+                label="Description"
+                multiline
+                minRows={2}
+                placeholder="Describe what happens in this scenario (used for AI matching)"
+                value={selectedScenario.description ?? ''}
+                onChange={event =>
+                  updateSelectedScenario(item => ({
+                    ...item,
+                    description: event.target.value || undefined,
+                  }))
+                }
+                fullWidth
+                sx={{
+                  '& .MuiInputBase-root': { color: '#fff', bgcolor: 'rgba(255,255,255,0.03)' },
+                  '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.65)' },
+                }}
+              />
+
+              {/* ── Image triplet fields ──────────────────────────────── */}
+              <Typography sx={{ fontWeight: 700, fontSize: '0.85rem', color: 'rgba(255,255,255,0.8)', mt: 0.5 }}>
+                🖼️ Image URLs (optional — shown when no video is set)
+              </Typography>
+              <TextField
+                label="Question Image URL / Path"
+                placeholder="/images/scenario-question.jpg"
+                value={selectedScenario.imageUrl ?? ''}
+                onChange={event => updateOptionalMediaField('imageUrl', event.target.value)}
+                fullWidth
+                sx={{
+                  '& .MuiInputBase-root': { color: '#fff', bgcolor: 'rgba(255,255,255,0.03)' },
+                  '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.65)' },
+                }}
+              />
+              <TextField
+                label="Wrong answer Image URL / Path"
+                placeholder="/images/scenario-wrong.jpg"
+                value={selectedScenario.imageUrlWrong ?? ''}
+                onChange={event => updateOptionalMediaField('imageUrlWrong', event.target.value)}
+                fullWidth
+                sx={{
+                  '& .MuiInputBase-root': { color: '#fff', bgcolor: 'rgba(255,255,255,0.03)' },
+                  '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.65)' },
+                }}
+              />
+              <TextField
+                label="Correct answer Image URL / Path"
+                placeholder="/images/scenario-correct.jpg"
+                value={selectedScenario.imageUrlCorrect ?? ''}
+                onChange={event => updateOptionalMediaField('imageUrlCorrect', event.target.value)}
+                fullWidth
+                sx={{
+                  '& .MuiInputBase-root': { color: '#fff', bgcolor: 'rgba(255,255,255,0.03)' },
+                  '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.65)' },
+                }}
+              />
+              <Typography sx={{ color: 'rgba(255,255,255,0.62)', fontSize: '0.78rem', mt: -1 }}>
+                Image triplet flow — fallback when no video URL is set for that state.
               </Typography>
 
               <Typography sx={{ fontWeight: 700, mt: 0.5 }}>
