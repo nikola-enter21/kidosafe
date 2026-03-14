@@ -182,6 +182,12 @@ def generate_safety_quiz_continuation(
         raise ValueError(f"Failed to parse model output as JSON: {e}\nRaw output:\n{raw_text}")
 
 
+class ImagePrompts(BaseModel):
+    question_image_prompt: str
+    success_image_prompt: str
+    failure_image_prompt: str
+
+
 def generate_image_prompts(
     situation: str,
     context: str,
@@ -213,13 +219,15 @@ def generate_image_prompts(
 
     payload = {
         "model": MODEL_ID,
-        "input": prompt,
+        "messages": [
+            {"role": "user", "content": prompt}
+        ],
         "temperature": 0.7,
         "stream": False,
     }
 
     response = requests.post(
-        f"{LM_STUDIO_BASE_URL}/api/v1/chat",
+        f"{LM_STUDIO_BASE_URL}/v1/chat/completions",
         headers={"Content-Type": "application/json"},
         json=payload,
         timeout=60,
@@ -228,33 +236,50 @@ def generate_image_prompts(
 
     data = response.json()
 
-    output_items = data.get("output", [])
     raw_text = ""
-    for item in output_items:
-        if item.get("type") == "message":
-            raw_text = item.get("content", "")
-            break
+    if "choices" in data and len(data["choices"]) > 0:
+         try:
+             raw_text = data["choices"][0]["message"]["content"]
+         except (KeyError, IndexError):
+             pass
 
+    if not raw_text:
+        # Fallback for other formats
+        output_items = data.get("output", [])
+        for item in output_items:
+            if item.get("type") == "message":
+                raw_text = item.get("content", "")
+                break
+    
     if not raw_text:
         raise ValueError(f"No message content found in API response: {data}")
 
+    # Remove markdown code blocks if present
     raw_text = raw_text.strip()
-    if raw_text.startswith("```"):
-        raw_text = raw_text.split("\n", 1)[-1]
-        raw_text = raw_text.rsplit("```", 1)[0]
+    if "```" in raw_text:
+        # Extract content between first and last ``` block
+        parts = raw_text.split("```")
+        # Usually the content is in the second part (index 1) 
+        # e.g. "Here is the json:\n```json\n{...}\n```"
+        if len(parts) >= 3:
+            raw_text = parts[1]
+            if raw_text.startswith("json"):
+                raw_text = raw_text[4:]
+        else:
+            # Fallback for "``` {...} ```"
+            raw_text = raw_text.replace("```json", "").replace("```", "")
+            
     raw_text = raw_text.strip()
 
     try:
-        image_prompts = json.loads(raw_text)
+        # Use Pydantic for validation
+        print("validating image prompts", raw_text)
+        prompts = ImagePrompts.model_validate_json(raw_text)
+        return prompts.model_dump()
+    except ValidationError as e:
+        raise ValueError(f"Failed to validate model output: {e}\nRaw output:\n{raw_text}")
     except json.JSONDecodeError as e:
         raise ValueError(f"Failed to parse model output as JSON: {e}\nRaw output:\n{raw_text}")
-
-    expected_fields = {"question_image_prompt", "success_image_prompt", "failure_image_prompt"}
-    missing = expected_fields - image_prompts.keys()
-    if missing:
-        raise ValueError(f"Response JSON is missing fields: {missing}\nParsed: {image_prompts}")
-
-    return image_prompts
 
 
 if __name__ == "__main__":
