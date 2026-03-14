@@ -4,17 +4,13 @@ import ArrowBackRounded from '@mui/icons-material/ArrowBackRounded'
 import ArrowDownwardRounded from '@mui/icons-material/ArrowDownwardRounded'
 import ArrowUpwardRounded from '@mui/icons-material/ArrowUpwardRounded'
 import DeleteOutlineRounded from '@mui/icons-material/DeleteOutlineRounded'
-import DownloadRounded from '@mui/icons-material/DownloadRounded'
-import RestartAltRounded from '@mui/icons-material/RestartAltRounded'
 import SaveRounded from '@mui/icons-material/SaveRounded'
-import UploadRounded from '@mui/icons-material/UploadRounded'
 import { type ChangeEvent, useEffect, useMemo, useRef, useState } from 'react'
 
 import { useGameStore } from '@/entities/game/model/gameStore'
 import { CATEGORIES, getCategoryById } from '@/entities/scenario/model/categories'
 import type { ContentDataset } from '@/entities/scenario/model/contentTypes'
 import {
-  exportDataset,
   getActiveDataset,
   importDataset,
   saveDataset,
@@ -79,16 +75,6 @@ function createScenarioTemplate(category: CategoryId, index: number): Scenario {
     tip: 'Talk to a trusted adult about the safest choice.',
     choices: [createChoice(0, true), createChoice(1, false), createChoice(2, false)],
   }
-}
-
-function downloadJsonFile(content: string, fileName: string) {
-  const blob = new Blob([content], { type: 'application/json' })
-  const href = URL.createObjectURL(blob)
-  const anchor = document.createElement('a')
-  anchor.href = href
-  anchor.download = fileName
-  anchor.click()
-  URL.revokeObjectURL(href)
 }
 
 export function EditorPage() {
@@ -232,38 +218,6 @@ export function EditorPage() {
       setError(saveError instanceof Error ? saveError.message : 'Failed to save content.')
       setMessage(null)
     }
-  }
-
-  const handleReset = async () => {
-    try {
-      const reloaded = await getActiveDataset()
-      setDataset(reloaded)
-      const firstCategory = (reloaded.categories[0] as CategoryId) ?? 'home-alone'
-      setSelectedCategory(firstCategory)
-      setSelectedScenarioId(reloaded.scenariosByCategory[firstCategory]?.[0]?.id ?? null)
-      setMessage('Dataset reloaded from server.')
-      setError(null)
-    } catch {
-      setError('Failed to reload from server.')
-    }
-  }
-
-  const handleExport = async () => {
-    try {
-      const json = await exportDataset()
-      downloadJsonFile(
-        json,
-        `kidosafe-content-v1-${new Date().toISOString().slice(0, 10)}.json`,
-      )
-      setMessage('Dataset exported.')
-      setError(null)
-    } catch {
-      setError('Failed to export dataset.')
-    }
-  }
-
-  const handleImportClick = () => {
-    fileInputRef.current?.click()
   }
 
   const handleImportFile = async (event: ChangeEvent<HTMLInputElement>) => {
