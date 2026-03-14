@@ -1,4 +1,4 @@
-export type Screen = 'home' | 'categories' | 'game' | 'result'
+export type Screen = 'home' | 'categories' | 'game' | 'result' | 'editor'
 
 export type CategoryId = 'home-alone' | 'stranger' | 'internet' | 'school'
 
