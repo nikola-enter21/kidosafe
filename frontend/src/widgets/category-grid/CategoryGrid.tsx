@@ -1,7 +1,8 @@
 import { Box, Grid, Typography } from '@mui/material'
 import { motion } from 'framer-motion'
 import { CATEGORIES } from '@/entities/scenario/model/categories'
-import { getScenarioCountByCategory } from '@/entities/scenario/model/contentRepository'
+import { useFetch } from '@/shared/api/http'
+import type { ApiCategory } from '@/shared/api/contentApi'
 import type { CategoryId } from '@/shared/types/game'
 
 interface CategoryGridProps {
@@ -9,10 +10,13 @@ interface CategoryGridProps {
 }
 
 export function CategoryGrid({ onSelect }: CategoryGridProps) {
+  const { data: apiCategories } = useFetch<ApiCategory[]>('/api/categories/')
+
   return (
     <Grid container spacing={{ xs: 2, md: 3 }}>
       {CATEGORIES.map((cat, i) => {
-        const scenarioCount = getScenarioCountByCategory(cat.id)
+        const apiCat = apiCategories?.find(c => c.id === cat.id)
+        const scenarioCount = apiCat?.scenarioCount ?? 0
         const isDisabled = scenarioCount === 0
 
         return (

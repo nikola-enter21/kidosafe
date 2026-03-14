@@ -15,6 +15,7 @@
     "@fontsource/manrope": "^5.2.6",
     "@mui/icons-material": "^7.3.5",
     "@mui/material": "^7.3.5",
+    "@rolldown/binding-darwin-arm64": "^1.0.0-rc.9",
     "@types/canvas-confetti": "^1.9.0",
     "@types/lodash": "^4.17.24",
     "@types/react-router-dom": "^5.3.3",
