@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import uvicorn
 
-app = FastAPI(title="KidoSafe AI Service", description="API for AI backend communication")
+app = FastAPI(title="KidoSafe AI Service", description="API for AI backend communication", port=5467)
 
 class Message(BaseModel):
     text: str
@@ -10,6 +10,10 @@ class Message(BaseModel):
 @app.get("/")
 def read_root():
     return {"status": "ok", "message": "AI Service is running"}
+
+@app.post("/create_quiz")
+def create_quiz(message: Message):
+    pass
 
 @app.post("/analyze")
 def analyze_text(message: Message):
