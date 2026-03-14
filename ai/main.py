@@ -6,20 +6,24 @@ import numpy as np
 from embedding import *
 from agent import *
 from env import *
+from typing import Dict
+import scipy
 
 app = FastAPI(title="KidoSafe AI Service", description="API for AI backend communication", port=5467)
+temperature = 0.2
 
 initialize_materials_and_embeddings()
 
-class Message(BaseModel):
-    text: str
+class UserRation(BaseModel):
+    ratio: Dict[str, float]
 
 @app.get("/")
 def read_root():
     return {"status": "ok", "message": "AI Service is running"}
 
-@app.post("/generate_scenario")
-def generate_scenario(message: Message):
+@app.post("/{category}/generate_scenario")
+def generate_scenario(category: str, message: Message):
+    
     # TODO: Implement scenario generation logic
     return {
         "status": "success",
@@ -27,13 +31,22 @@ def generate_scenario(message: Message):
         "original_text": message.text
     }
 
-@app.post("/analyze")
-def analyze_text(message: Message):
-    # TODO: Implement your AI logic here
+@app.post("/get_next_category")
+def get_next_category(ratio: UserRation):
+    dict_ratio = ratio.ratio
+
+    ratios_array = np.array(list(dict_ratio.values()), dtype=float)
+    
+    scaled_ratios = -ratios_array / temperature
+    scaled_ratios -= np.max(scaled_ratios) 
+    
+    exp_vals = np.exp(scaled_ratios)
+    probabilities = exp_vals / np.sum(exp_vals)
+
+    next_category = np.random.choice(list(dict_ratio.keys()), p=probabilities)
+    
     return {
-        "status": "success",
-        "result": "Safe",
-        "original_text": message.text
+        "next_category": next_category
     }
 
 if __name__ == "__main__":
