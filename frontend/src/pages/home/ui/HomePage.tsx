@@ -1,11 +1,14 @@
 import { Box, Button, Typography } from '@mui/material'
 import { motion } from 'framer-motion'
 import { useGameStore } from '@/entities/game/model/gameStore'
+import { CATEGORIES } from '@/entities/scenario/model/categories'
+import { getTotalScenarioCount } from '@/entities/scenario/model/contentRepository'
 
 const FLOATING = ['❤️', '⭐', '🛡️', '🎒', '💻', '🏠', '🔒', '🌟']
 
 export function HomePage() {
   const goToScreen = useGameStore(s => s.goToScreen)
+  const totalChallenges = getTotalScenarioCount()
 
   return (
     <Box
@@ -148,8 +151,8 @@ export function HomePage() {
               }}
             >
               {[
-                { emoji: '🗂️', value: '4', label: 'Categories' },
-                { emoji: '🎯', value: '20', label: 'Challenges' },
+                { emoji: '🗂️', value: String(CATEGORIES.length), label: 'Categories' },
+                { emoji: '🎯', value: String(totalChallenges), label: 'Challenges' },
                 { emoji: '🏆', value: '3★', label: 'Max Stars' },
               ].map(stat => (
                 <Box key={stat.label} sx={{ textAlign: 'center' }}>
@@ -180,29 +183,50 @@ export function HomePage() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.52, type: 'spring', stiffness: 200 }}
           >
-            <Button
-              fullWidth
-              size="large"
-              onClick={() => goToScreen('categories')}
-              sx={{
-                bgcolor: '#fff',
-                color: '#6d28d9',
-                fontWeight: 900,
-                fontSize: { xs: '1.1rem', md: '1.25rem' },
-                py: { xs: 1.75, md: 2 },
-                borderRadius: 99,
-                boxShadow: '0 8px 28px rgba(0,0,0,0.28)',
-                letterSpacing: '0.01em',
-                '&:hover': {
-                  bgcolor: '#f5f3ff',
-                  transform: 'translateY(-3px)',
-                  boxShadow: '0 14px 36px rgba(0,0,0,0.35)',
-                },
-                transition: 'all 0.22s ease',
-              }}
-            >
-              🚀 Let's Play!
-            </Button>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+              <Button
+                fullWidth
+                size="large"
+                onClick={() => goToScreen('categories')}
+                sx={{
+                  bgcolor: '#fff',
+                  color: '#6d28d9',
+                  fontWeight: 900,
+                  fontSize: { xs: '1.1rem', md: '1.25rem' },
+                  py: { xs: 1.75, md: 2 },
+                  borderRadius: 99,
+                  boxShadow: '0 8px 28px rgba(0,0,0,0.28)',
+                  letterSpacing: '0.01em',
+                  '&:hover': {
+                    bgcolor: '#f5f3ff',
+                    transform: 'translateY(-3px)',
+                    boxShadow: '0 14px 36px rgba(0,0,0,0.35)',
+                  },
+                  transition: 'all 0.22s ease',
+                }}
+              >
+                🚀 Let's Play!
+              </Button>
+              <Button
+                fullWidth
+                onClick={() => goToScreen('editor')}
+                sx={{
+                  color: '#fff',
+                  border: '1.5px solid rgba(255,255,255,0.4)',
+                  fontWeight: 800,
+                  fontSize: { xs: '0.95rem', md: '1rem' },
+                  py: { xs: 1.1, md: 1.2 },
+                  borderRadius: 99,
+                  bgcolor: 'rgba(255,255,255,0.08)',
+                  '&:hover': {
+                    bgcolor: 'rgba(255,255,255,0.16)',
+                    borderColor: 'rgba(255,255,255,0.6)',
+                  },
+                }}
+              >
+                🛠️ Content Studio
+              </Button>
+            </Box>
           </motion.div>
         </Box>
       </motion.div>

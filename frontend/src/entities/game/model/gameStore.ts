@@ -49,6 +49,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   selectCategory: (id) => {
     const scenarios = getScenariosByCategory(id)
+    if (scenarios.length === 0) return
     set({
       selectedCategory: id,
       scenarios,
