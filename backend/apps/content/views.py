@@ -1,12 +1,17 @@
+import requests as http_requests
+
+from django.conf import settings
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Category, Scenario, Choice, _choice_id
+from .image_service import generate_and_save_images
+from .models import Category, Scenario, Choice, _scenario_id, _choice_id
 from .serializers import (
     CategorySerializer,
+    MaterialInputSerializer,
     ScenarioSerializer,
     ScenarioListSerializer,
     ChoiceSerializer,
@@ -43,6 +48,76 @@ class CategoryViewSet(viewsets.ModelViewSet):
         qs = category.scenarios.prefetch_related('choices').order_by('order', 'created_at')
         serializer = ScenarioSerializer(qs, many=True)
         return Response(serializer.data)
+
+    @action(detail=True, methods=['get'], url_path='generate_scenario')
+    def generate_scenario(self, request, pk=None):
+        """
+        GET /api/categories/{id}/generate_scenario/
+
+        Calls SCENARIO_SERVICE_URL to fetch a material JSON, then:
+
+        Case 1 — id_material absent or not in DB:
+            Calls IMAGE_SERVICE_URL 3× to generate images, saves PNGs to
+            frontend/public/{category}/, creates new Scenario + Choices.
+
+        Case 2 — id_material found in DB:
+            Copies all media fields (images + videos) from the existing scenario,
+            creates a new Scenario record with the new question + Choices.
+        """
+        category = self.get_object()
+
+        # Fetch material JSON from the AI scenario service
+        resp = http_requests.get(
+            f"{settings.SCENARIO_SERVICE_URL}/{category.id}/generate-scenario",
+            timeout=60,
+        )
+        resp.raise_for_status()
+
+        serializer = MaterialInputSerializer(data=resp.json())
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        id_material = (data.get('id_material') or '').strip()
+        existing = Scenario.objects.filter(id=id_material).first() if id_material else None
+        new_id = _scenario_id(category.id)
+
+        if existing:
+            # Case 2: copy media from existing scenario, new question + choices
+            scenario = Scenario.objects.create(
+                id=new_id,
+                category=category,
+                question=data['question'],
+                tip='',
+                image_url=existing.image_url,
+                image_url_correct=existing.image_url_correct,
+                image_url_wrong=existing.image_url_wrong,
+                question_video_url=existing.question_video_url,
+                correct_video_url=existing.correct_video_url,
+                wrong_video_url=existing.wrong_video_url,
+            )
+        else:
+            # Case 1: generate images then create new scenario
+            image_paths = generate_and_save_images(
+                category_id=category.id,
+                scenario_id=new_id,
+                prompts={
+                    'question': data['question_image_prompt'],
+                    'success':  data['success_image_prompt'],
+                    'failure':  data['failure_image_prompt'],
+                },
+            )
+            scenario = Scenario.objects.create(
+                id=new_id,
+                category=category,
+                question=data['question'],
+                tip='',
+                image_url=image_paths.get('question', ''),
+                image_url_correct=image_paths.get('success', ''),
+                image_url_wrong=image_paths.get('failure', ''),
+            )
+
+        _bulk_create_choices(scenario, data['answers'], data['correctAnswer'])
+        return Response(ScenarioSerializer(scenario).data, status=status.HTTP_201_CREATED)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -189,6 +264,24 @@ class ChoiceViewSet(viewsets.ModelViewSet):
         choice = Choice.objects.create(scenario=scenario, **vd)
         out = ChoiceSerializer(choice)
         return Response(out.data, status=status.HTTP_201_CREATED)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Helpers
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _bulk_create_choices(scenario: Scenario, answers: list, correct_idx: int) -> None:
+    """Create Choice records for a scenario from a flat answers list."""
+    Choice.objects.bulk_create([
+        Choice(
+            id=_choice_id(scenario.id),
+            scenario=scenario,
+            text=answers[i],
+            is_correct=(i == correct_idx),
+            order=i,
+        )
+        for i in range(len(answers))
+    ])
 
 
 # ─────────────────────────────────────────────────────────────────────────────
