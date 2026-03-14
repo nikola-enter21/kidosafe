@@ -74,7 +74,7 @@ export function CategoriesPage() {
         </IconButton>
         <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
           <Typography sx={{ fontWeight: 800, fontSize: '0.85rem', color: 'rgba(255,255,255,0.55)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-            🦸 KidoSafe
+            🦸 KiddoSafe
           </Typography>
         </motion.div>
       </Box>

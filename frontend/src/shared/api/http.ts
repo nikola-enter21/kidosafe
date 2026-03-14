@@ -17,21 +17,25 @@ function resolveApiUrl(url: string) {
 }
 
 export const get = async <Response>(url: string): Promise<Response> => {
-  return ky(resolveApiUrl(url), {
-    credentials: 'include',
-  }).json<Response>()
+  return ky(resolveApiUrl(url)).json<Response>()
 }
 
 export const post = async <Response, Data = unknown>(
   url: string,
   data?: Data,
 ): Promise<Response> => {
-  return ky
-    .post(resolveApiUrl(url), {
-      json: data,
-      credentials: 'include',
-    })
-    .json<Response>()
+  return ky.post(resolveApiUrl(url), { json: data }).json<Response>()
+}
+
+export const put = async <Response, Data = unknown>(
+  url: string,
+  data?: Data,
+): Promise<Response> => {
+  return ky.put(resolveApiUrl(url), { json: data }).json<Response>()
+}
+
+export const del = async (url: string): Promise<void> => {
+  await ky.delete(resolveApiUrl(url))
 }
 
 export function useFetch<Data>(url: string | undefined) {

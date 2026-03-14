@@ -2,13 +2,15 @@ import { Box, Button, Typography } from '@mui/material'
 import { motion } from 'framer-motion'
 import { useGameStore } from '@/entities/game/model/gameStore'
 import { CATEGORIES } from '@/entities/scenario/model/categories'
-import { getTotalScenarioCount } from '@/entities/scenario/model/contentRepository'
+import { useFetch } from '@/shared/api/http'
+import type { ApiCategory } from '@/shared/api/contentApi'
 
 const FLOATING = ['❤️', '⭐', '🛡️', '🎒', '💻', '🏠', '🔒', '🌟']
 
 export function HomePage() {
   const goToScreen = useGameStore(s => s.goToScreen)
-  const totalChallenges = getTotalScenarioCount()
+  const { data: apiCategories } = useFetch<ApiCategory[]>('/api/categories/')
+  const totalChallenges = apiCategories?.reduce((sum, c) => sum + c.scenarioCount, 0) ?? 0
 
   return (
     <Box
@@ -119,7 +121,7 @@ export function HomePage() {
                 mb: 1.5,
               }}
             >
-              KidoSafe
+              KiddoSafe
             </Typography>
             <Typography
               sx={{

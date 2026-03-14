@@ -9,192 +9,84 @@
   "scenariosByCategory": {
     "home-alone": [
       {
-        "id": "ha-1",
+        "id": "ha-kontakt",
         "category": "home-alone",
         "scene": {
           "background": "linear-gradient(135deg, #FF9A9E 0%, #FECFEF 100%)",
-          "emoji": "🔥",
-          "label": "Kitchen smoke"
+          "emoji": "☎️",
+          "label": "Exposed electrical outlet"
         },
-        "question": "You smell smoke coming from the kitchen. What do you do?",
+        "question": "You see an exposed electrical outlet/wire and you are about to touch it. What do you do?",
         "watchTime": 4,
-        "tip": "If there is smoke or fire, always leave the house and call 112. Never try to put it out yourself!",
+        "tip": "You should never touch exposed wires or outlets. You move away and call a trusted adult immediately.",
+        "questionVideoUrl": "/homealone/kontakt/new_style_part_1.mp4",
+        "wrongVideoUrl": "/homealone/kontakt/new_style_part_2.mp4",
+        "correctVideoUrl": "/homealone/kontakt/new_style_part_3.mp4",
         "choices": [
           {
-            "id": "ha-1-a",
-            "text": "Leave the house and call 112",
-            "emoji": "🚨",
+            "id": "ha-kontakt-a",
+            "text": "You step back and call a trusted adult right away.",
+            "emoji": "🛡️",
             "isCorrect": true,
-            "feedback": "Great job! Always leave first and call for help. You are so brave!",
+            "feedback": "Great choice! You stayed away from electricity and got adult help.",
             "feedbackEmoji": "🌟"
           },
           {
-            "id": "ha-1-b",
-            "text": "Try to open a window",
-            "emoji": "🪟",
+            "id": "ha-kontakt-b",
+            "text": "You touch it lightly to see if it is dangerous.",
+            "emoji": "💬",
             "isCorrect": false,
-            "feedback": "Oops! Smoke is very dangerous. Always leave the house right away!",
+            "feedback": "That is dangerous. You can get an electric shock even from a light touch.",
             "feedbackEmoji": "⚠️"
           },
           {
-            "id": "ha-1-c",
-            "text": "Ignore it and keep playing",
-            "emoji": "🎮",
+            "id": "ha-kontakt-c",
+            "text": "You try to move it with an object.",
+            "emoji": "❌",
             "isCorrect": false,
-            "feedback": "Never ignore smoke! It can be very dangerous. Always get out fast!",
+            "feedback": "That is still dangerous. You should leave it and call an adult.",
             "feedbackEmoji": "❌"
           }
         ]
       },
       {
-        "id": "ha-2",
+        "id": "ha-otrova",
         "category": "home-alone",
         "scene": {
-          "background": "linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)",
-          "emoji": "🚪",
-          "label": "Doorbell stranger"
+          "background": "linear-gradient(135deg, #f6d365 0%, #fda085 100%)",
+          "emoji": "🧪",
+          "label": "Cleaner that looks like juice"
         },
-        "question": "Someone rings the doorbell and says \"I have a package, please open the door.\" What do you do?",
+        "question": "You see a bottle with cleaner that looks like juice. What do you do?",
         "watchTime": 4,
-        "tip": "Never open the door to strangers when you're home alone. Call your parent first!",
+        "tip": "You should never drink, smell, or taste unknown liquids. You call a trusted adult immediately.",
+        "questionVideoUrl": "/homealone/otrova/new_style_2_1.mp4",
+        "wrongVideoUrl": "/homealone/otrova/new_style_2_2.mp4",
+        "correctVideoUrl": "/homealone/otrova/new_style_2_3.mp4",
         "choices": [
           {
-            "id": "ha-2-a",
-            "text": "Call your parent and ask",
-            "emoji": "📱",
+            "id": "ha-otrova-a",
+            "text": "You do not touch it and tell a trusted adult right away.",
+            "emoji": "📞",
             "isCorrect": true,
-            "feedback": "Perfect! Always call your parent before opening the door for anyone!",
+            "feedback": "Excellent! You stayed safe and asked an adult for help.",
             "feedbackEmoji": "🌟"
           },
           {
-            "id": "ha-2-b",
-            "text": "Open the door",
-            "emoji": "🔓",
+            "id": "ha-otrova-b",
+            "text": "You take a sip to check if it is juice.",
+            "emoji": "🫳",
             "isCorrect": false,
-            "feedback": "Never open the door to strangers when home alone. Stay safe!",
+            "feedback": "That is very dangerous. Cleaners can be poisonous.",
             "feedbackEmoji": "❌"
           },
           {
-            "id": "ha-2-c",
-            "text": "Shout \"Come back later!\"",
-            "emoji": "📦",
+            "id": "ha-otrova-c",
+            "text": "You smell it closely to figure out what it is.",
+            "emoji": "👃",
             "isCorrect": false,
-            "feedback": "Good that you didn't open! But always call your parent to let them know.",
+            "feedback": "That is unsafe. Fumes from cleaners can also be harmful.",
             "feedbackEmoji": "⚠️"
-          }
-        ]
-      },
-      {
-        "id": "ha-3",
-        "category": "home-alone",
-        "scene": {
-          "background": "linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)",
-          "emoji": "🔌",
-          "label": "Sparking outlet"
-        },
-        "question": "You see sparks coming out of an electrical outlet. What do you do?",
-        "watchTime": 4,
-        "tip": "Electricity is very dangerous! Stay away and call your parent or 112 immediately.",
-        "choices": [
-          {
-            "id": "ha-3-a",
-            "text": "Stay away and call your parent",
-            "emoji": "📵",
-            "isCorrect": true,
-            "feedback": "Super smart! Electricity can hurt you badly. Always stay away and get an adult!",
-            "feedbackEmoji": "🌟"
-          },
-          {
-            "id": "ha-3-b",
-            "text": "Unplug the cable yourself",
-            "emoji": "⚡",
-            "isCorrect": false,
-            "feedback": "Never touch sparking outlets! This is very dangerous. Call an adult instead!",
-            "feedbackEmoji": "❌"
-          },
-          {
-            "id": "ha-3-c",
-            "text": "Pour water on it",
-            "emoji": "💧",
-            "isCorrect": false,
-            "feedback": "Water + electricity = very dangerous! Always call an adult right away!",
-            "feedbackEmoji": "❌"
-          }
-        ]
-      },
-      {
-        "id": "ha-4",
-        "category": "home-alone",
-        "scene": {
-          "background": "linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%)",
-          "emoji": "🩹",
-          "label": "Small cut"
-        },
-        "question": "You accidentally cut your finger while playing. It's small but bleeding. What do you do?",
-        "watchTime": 3,
-        "tip": "For small cuts, rinse with water and use a bandage. Call your parent to let them know!",
-        "choices": [
-          {
-            "id": "ha-4-a",
-            "text": "Rinse it and put a bandage on",
-            "emoji": "🩹",
-            "isCorrect": true,
-            "feedback": "Well done! Clean the cut, use a bandage, and tell your parent when they're back!",
-            "feedbackEmoji": "🌟"
-          },
-          {
-            "id": "ha-4-b",
-            "text": "Ignore it and keep playing",
-            "emoji": "🎯",
-            "isCorrect": false,
-            "feedback": "Even small cuts need care! Always clean and cover them to stay healthy.",
-            "feedbackEmoji": "⚠️"
-          },
-          {
-            "id": "ha-4-c",
-            "text": "Lick the cut clean",
-            "emoji": "👅",
-            "isCorrect": false,
-            "feedback": "Mouths have germs! Always rinse with clean water and use a bandage.",
-            "feedbackEmoji": "❌"
-          }
-        ]
-      },
-      {
-        "id": "ha-5",
-        "category": "home-alone",
-        "scene": {
-          "background": "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
-          "emoji": "🔪",
-          "label": "Sharp knife"
-        },
-        "question": "You find a sharp knife left on the kitchen counter. What do you do?",
-        "watchTime": 4,
-        "tip": "Sharp things like knives are only for adults. Leave them alone and tell an adult when they return.",
-        "choices": [
-          {
-            "id": "ha-5-a",
-            "text": "Leave it and tell an adult later",
-            "emoji": "🚶",
-            "isCorrect": true,
-            "feedback": "Excellent! Never touch sharp things. Wait for your parent to come back!",
-            "feedbackEmoji": "🌟"
-          },
-          {
-            "id": "ha-5-b",
-            "text": "Pick it up and put it away",
-            "emoji": "✋",
-            "isCorrect": false,
-            "feedback": "Don't touch sharp knives! You could get badly hurt. Leave it for an adult.",
-            "feedbackEmoji": "❌"
-          },
-          {
-            "id": "ha-5-c",
-            "text": "Use it to cut fruit",
-            "emoji": "🍎",
-            "isCorrect": false,
-            "feedback": "Knives are very dangerous for kids. Always ask an adult for help!",
-            "feedbackEmoji": "❌"
           }
         ]
       }

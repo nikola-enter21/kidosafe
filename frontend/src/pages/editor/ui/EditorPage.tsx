@@ -1,4 +1,4 @@
-import { Alert, Box, Button, IconButton, Paper, Radio, Stack, TextField, Typography } from '@mui/material'
+import { Alert, Box, Button, CircularProgress, IconButton, Paper, Radio, Stack, TextField, Typography } from '@mui/material'
 import AddRounded from '@mui/icons-material/AddRounded'
 import ArrowBackRounded from '@mui/icons-material/ArrowBackRounded'
 import ArrowDownwardRounded from '@mui/icons-material/ArrowDownwardRounded'
@@ -8,7 +8,7 @@ import DownloadRounded from '@mui/icons-material/DownloadRounded'
 import RestartAltRounded from '@mui/icons-material/RestartAltRounded'
 import SaveRounded from '@mui/icons-material/SaveRounded'
 import UploadRounded from '@mui/icons-material/UploadRounded'
-import { type ChangeEvent, useMemo, useRef, useState } from 'react'
+import { type ChangeEvent, useEffect, useMemo, useRef, useState } from 'react'
 
 import { useGameStore } from '@/entities/game/model/gameStore'
 import { CATEGORIES, getCategoryById } from '@/entities/scenario/model/categories'
@@ -17,14 +17,34 @@ import {
   exportDataset,
   getActiveDataset,
   importDataset,
-  resetDataset,
   saveDataset,
 } from '@/entities/scenario/model/contentRepository'
 import type { Choice, Scenario } from '@/entities/scenario/model/types'
 import type { CategoryId } from '@/shared/types/game'
 
+const CATEGORY_IDS = CATEGORIES.map(c => c.id) as CategoryId[]
+
+type VideoField =
+  | 'videoUrl'
+  | 'questionVideoUrl'
+  | 'wrongVideoUrl'
+  | 'correctVideoUrl'
+
 function cloneDataset(dataset: ContentDataset): ContentDataset {
   return JSON.parse(JSON.stringify(dataset)) as ContentDataset
+}
+
+function createEmptyDataset(): ContentDataset {
+  return {
+    version: 1,
+    categories: [...CATEGORY_IDS],
+    scenariosByCategory: {
+      'home-alone': [],
+      stranger: [],
+      internet: [],
+      school: [],
+    },
+  }
 }
 
 function createScenarioTemplate(category: CategoryId, index: number): Scenario {
@@ -71,16 +91,26 @@ function downloadJsonFile(content: string, fileName: string) {
 export function EditorPage() {
   const goToScreen = useGameStore(s => s.goToScreen)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const [dataset, setDataset] = useState<ContentDataset>(() => getActiveDataset())
-  const [selectedCategory, setSelectedCategory] = useState<CategoryId>(() => {
-    return (dataset.categories[0] as CategoryId) ?? 'home-alone'
-  })
-  const [selectedScenarioId, setSelectedScenarioId] = useState<string | null>(() => {
-    const firstCategory = (dataset.categories[0] as CategoryId) ?? 'home-alone'
-    return dataset.scenariosByCategory[firstCategory]?.[0]?.id ?? null
-  })
+
+  const [dataset, setDataset] = useState<ContentDataset>(createEmptyDataset)
+  const [selectedCategory, setSelectedCategory] = useState<CategoryId>('home-alone')
+  const [selectedScenarioId, setSelectedScenarioId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  // Load initial dataset from backend
+  useEffect(() => {
+    getActiveDataset()
+      .then(data => {
+        setDataset(data)
+        const firstCategory = (data.categories[0] as CategoryId) ?? 'home-alone'
+        setSelectedCategory(firstCategory)
+        setSelectedScenarioId(data.scenariosByCategory[firstCategory]?.[0]?.id ?? null)
+      })
+      .catch(() => setError('Failed to load content from server.'))
+      .finally(() => setLoading(false))
+  }, [])
 
   const categoryScenarios = dataset.scenariosByCategory[selectedCategory] ?? []
   const selectedScenarioIndex = categoryScenarios.findIndex(s => s.id === selectedScenarioId)
@@ -117,6 +147,19 @@ export function EditorPage() {
     updateCategoryScenarios(selectedCategory, list =>
       list.map(item => (item.id === selectedScenario.id ? updater(item) : item)),
     )
+  }
+
+  const updateOptionalVideoField = (field: VideoField, rawValue: string) => {
+    updateSelectedScenario(item => {
+      const value = rawValue.trim()
+      if (value) {
+        return { ...item, [field]: value }
+      }
+
+      const next = { ...item } as Scenario & Record<string, unknown>
+      delete next[field]
+      return next as Scenario
+    })
   }
 
   const handleAddScenario = () => {
@@ -163,12 +206,12 @@ export function EditorPage() {
     setSelectedScenarioId(scenarioId)
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     try {
-      saveDataset(dataset)
-      const reloaded = getActiveDataset()
+      await saveDataset(dataset)
+      const reloaded = await getActiveDataset()
       setDataset(reloaded)
-      setMessage('Content saved locally.')
+      setMessage('Content saved to server.')
       setError(null)
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : 'Failed to save content.')
@@ -176,25 +219,32 @@ export function EditorPage() {
     }
   }
 
-  const handleReset = () => {
-    resetDataset()
-    const reloaded = getActiveDataset()
-    setDataset(reloaded)
-    const firstCategory = (reloaded.categories[0] as CategoryId) ?? 'home-alone'
-    setSelectedCategory(firstCategory)
-    setSelectedScenarioId(reloaded.scenariosByCategory[firstCategory]?.[0]?.id ?? null)
-    setMessage('Dataset reset to seed JSON.')
-    setError(null)
+  const handleReset = async () => {
+    try {
+      const reloaded = await getActiveDataset()
+      setDataset(reloaded)
+      const firstCategory = (reloaded.categories[0] as CategoryId) ?? 'home-alone'
+      setSelectedCategory(firstCategory)
+      setSelectedScenarioId(reloaded.scenariosByCategory[firstCategory]?.[0]?.id ?? null)
+      setMessage('Dataset reloaded from server.')
+      setError(null)
+    } catch {
+      setError('Failed to reload from server.')
+    }
   }
 
-  const handleExport = () => {
-    const json = exportDataset()
-    downloadJsonFile(
-      json,
-      `kidosafe-content-v1-${new Date().toISOString().slice(0, 10)}.json`,
-    )
-    setMessage('Dataset exported.')
-    setError(null)
+  const handleExport = async () => {
+    try {
+      const json = await exportDataset()
+      downloadJsonFile(
+        json,
+        `kidosafe-content-v1-${new Date().toISOString().slice(0, 10)}.json`,
+      )
+      setMessage('Dataset exported.')
+      setError(null)
+    } catch {
+      setError('Failed to export dataset.')
+    }
   }
 
   const handleImportClick = () => {
@@ -207,20 +257,36 @@ export function EditorPage() {
     if (!file) return
 
     const text = await file.text()
-    const result = importDataset(text)
+    const result = await importDataset(text)
     if (!result.ok) {
       setError(result.error)
       setMessage(null)
       return
     }
 
-    const reloaded = getActiveDataset()
+    const reloaded = await getActiveDataset()
     setDataset(reloaded)
     const firstCategory = (reloaded.categories[0] as CategoryId) ?? 'home-alone'
     setSelectedCategory(firstCategory)
     setSelectedScenarioId(reloaded.scenariosByCategory[firstCategory]?.[0]?.id ?? null)
     setMessage('Dataset imported successfully.')
     setError(null)
+  }
+
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          minHeight: '100vh',
+          bgcolor: '#0b1020',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <CircularProgress sx={{ color: '#a78bfa' }} />
+      </Box>
+    )
   }
 
   return (
@@ -291,7 +357,7 @@ export function EditorPage() {
             onClick={handleReset}
             sx={{ color: '#fff', borderColor: 'rgba(255,255,255,0.4)' }}
           >
-            Reset
+            Reload
           </Button>
         </Stack>
       </Box>
@@ -475,23 +541,53 @@ export function EditorPage() {
                 label="Video URL / Path"
                 placeholder="/videos/my-video.mp4 or https://..."
                 value={selectedScenario.videoUrl ?? ''}
-                onChange={event =>
-                  updateSelectedScenario(item => {
-                    const value = event.target.value.trim()
-                    if (!value) {
-                      const next = { ...item }
-                      delete next.videoUrl
-                      return next
-                    }
-                    return { ...item, videoUrl: value }
-                  })
-                }
+                onChange={event => updateOptionalVideoField('videoUrl', event.target.value)}
                 fullWidth
                 sx={{
                   '& .MuiInputBase-root': { color: '#fff', bgcolor: 'rgba(255,255,255,0.03)' },
                   '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.65)' },
                 }}
               />
+              <Typography sx={{ color: 'rgba(255,255,255,0.62)', fontSize: '0.78rem', mt: -1 }}>
+                Legacy single video flow (optional).
+              </Typography>
+
+              <TextField
+                label="Question video URL / Path (part_1)"
+                placeholder="/homealone/kontakt/new_style_part_1.mp4"
+                value={selectedScenario.questionVideoUrl ?? ''}
+                onChange={event => updateOptionalVideoField('questionVideoUrl', event.target.value)}
+                fullWidth
+                sx={{
+                  '& .MuiInputBase-root': { color: '#fff', bgcolor: 'rgba(255,255,255,0.03)' },
+                  '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.65)' },
+                }}
+              />
+              <TextField
+                label="Wrong answer video URL / Path (part_2)"
+                placeholder="/homealone/kontakt/new_style_part_2.mp4"
+                value={selectedScenario.wrongVideoUrl ?? ''}
+                onChange={event => updateOptionalVideoField('wrongVideoUrl', event.target.value)}
+                fullWidth
+                sx={{
+                  '& .MuiInputBase-root': { color: '#fff', bgcolor: 'rgba(255,255,255,0.03)' },
+                  '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.65)' },
+                }}
+              />
+              <TextField
+                label="Correct answer video URL / Path (part_3)"
+                placeholder="/homealone/kontakt/new_style_part_3.mp4"
+                value={selectedScenario.correctVideoUrl ?? ''}
+                onChange={event => updateOptionalVideoField('correctVideoUrl', event.target.value)}
+                fullWidth
+                sx={{
+                  '& .MuiInputBase-root': { color: '#fff', bgcolor: 'rgba(255,255,255,0.03)' },
+                  '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.65)' },
+                }}
+              />
+              <Typography sx={{ color: 'rgba(255,255,255,0.62)', fontSize: '0.78rem', mt: -1 }}>
+                Triplet video flow requires all 3 fields: question + wrong + correct.
+              </Typography>
 
               <Typography sx={{ fontWeight: 700, mt: 0.5 }}>
                 Answers (exactly 3, one correct)
