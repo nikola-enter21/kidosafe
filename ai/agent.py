@@ -342,6 +342,7 @@ if __name__ == "__main__":
 #     correct_answer = opening["answers"][opening["correct_answer"]]
 #     print(f"\nStep 2 — Continuing with correct answer: '{correct_answer}'\n")
 
+<<<<<<< Updated upstream
 #     continuation = generate_safety_quiz_continuation(
 #         topic=topic,
 #         situation=opening["scenario"],
