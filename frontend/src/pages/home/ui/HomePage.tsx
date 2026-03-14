@@ -1,5 +1,6 @@
-import { Box, Button, Typography } from '@mui/material'
-import { motion } from 'framer-motion'
+import { useState, useRef } from 'react'
+import { Box, Button, CircularProgress, TextField, Typography } from '@mui/material'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useGameStore } from '@/entities/game/model/gameStore'
 import { CATEGORIES } from '@/entities/scenario/model/categories'
 import { useFetch } from '@/shared/api/http'
@@ -9,8 +10,24 @@ const FLOATING = ['❤️', '⭐', '🛡️', '🎒', '💻', '🏠', '🔒', '�
 
 export function HomePage() {
   const goToScreen = useGameStore(s => s.goToScreen)
+  const playerUsername = useGameStore(s => s.playerUsername)
+  const isSettingPlayer = useGameStore(s => s.isSettingPlayer)
+  const setPlayer = useGameStore(s => s.setPlayer)
+  const clearPlayer = useGameStore(s => s.clearPlayer)
+
   const { data: apiCategories } = useFetch<ApiCategory[]>('/api/categories/')
   const totalChallenges = apiCategories?.reduce((sum, c) => sum + c.scenarioCount, 0) ?? 0
+
+  const [inputValue, setInputValue] = useState('')
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  const handleStart = async () => {
+    const val = inputValue.trim()
+    if (!val) return
+    await setPlayer(val)
+  }
+
+  const hasPlayer = !!playerUsername
 
   return (
     <Box
@@ -134,7 +151,9 @@ export function HomePage() {
                 mb: 3.5,
               }}
             >
-              Learn how to stay safe every day with fun adventures! 🌟
+              {hasPlayer
+                ? `Welcome back, ${playerUsername}! 🌟`
+                : 'Learn how to stay safe every day with fun adventures! 🌟'}
             </Typography>
           </motion.div>
 
@@ -160,12 +179,7 @@ export function HomePage() {
                 <Box key={stat.label} sx={{ textAlign: 'center' }}>
                   <Typography sx={{ fontSize: '1.5rem', mb: 0.25 }}>{stat.emoji}</Typography>
                   <Typography
-                    sx={{
-                      color: '#fff',
-                      fontWeight: 900,
-                      fontSize: '1.3rem',
-                      lineHeight: 1,
-                    }}
+                    sx={{ color: '#fff', fontWeight: 900, fontSize: '1.3rem', lineHeight: 1 }}
                   >
                     {stat.value}
                   </Typography>
@@ -179,56 +193,146 @@ export function HomePage() {
             </Box>
           </motion.div>
 
-          {/* CTA button */}
+          {/* ── CTA: USERNAME INPUT or PLAY BUTTONS ─────────────────────── */}
           <motion.div
             initial={{ opacity: 0, scale: 0.88 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.52, type: 'spring', stiffness: 200 }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-              <Button
-                fullWidth
-                size="large"
-                onClick={() => goToScreen('categories')}
-                sx={{
-                  bgcolor: '#fff',
-                  color: '#6d28d9',
-                  fontWeight: 900,
-                  fontSize: { xs: '1.1rem', md: '1.25rem' },
-                  py: { xs: 1.75, md: 2 },
-                  borderRadius: 99,
-                  boxShadow: '0 8px 28px rgba(0,0,0,0.28)',
-                  letterSpacing: '0.01em',
-                  '&:hover': {
-                    bgcolor: '#f5f3ff',
-                    transform: 'translateY(-3px)',
-                    boxShadow: '0 14px 36px rgba(0,0,0,0.35)',
-                  },
-                  transition: 'all 0.22s ease',
-                }}
-              >
-                🚀 Let's Play!
-              </Button>
-              <Button
-                fullWidth
-                onClick={() => goToScreen('editor')}
-                sx={{
-                  color: '#fff',
-                  border: '1.5px solid rgba(255,255,255,0.4)',
-                  fontWeight: 800,
-                  fontSize: { xs: '0.95rem', md: '1rem' },
-                  py: { xs: 1.1, md: 1.2 },
-                  borderRadius: 99,
-                  bgcolor: 'rgba(255,255,255,0.08)',
-                  '&:hover': {
-                    bgcolor: 'rgba(255,255,255,0.16)',
-                    borderColor: 'rgba(255,255,255,0.6)',
-                  },
-                }}
-              >
-                🛠️ Content Studio
-              </Button>
-            </Box>
+            <AnimatePresence mode="wait">
+              {!hasPlayer ? (
+                /* ── No player: show username input ─────────────────────── */
+                <motion.div
+                  key="username-form"
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                    <TextField
+                      inputRef={inputRef}
+                      value={inputValue}
+                      onChange={e => setInputValue(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && handleStart()}
+                      placeholder="Enter your name to start…"
+                      variant="outlined"
+                      fullWidth
+                      autoFocus
+                      inputProps={{ maxLength: 30 }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          bgcolor: 'rgba(255,255,255,0.1)',
+                          borderRadius: 3,
+                          color: '#fff',
+                          fontSize: '1.1rem',
+                          fontWeight: 700,
+                          '& fieldset': { borderColor: 'rgba(255,255,255,0.3)' },
+                          '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.6)' },
+                          '&.Mui-focused fieldset': { borderColor: '#a855f7' },
+                        },
+                        '& input::placeholder': { color: 'rgba(255,255,255,0.4)', opacity: 1 },
+                      }}
+                    />
+                    <Button
+                      fullWidth
+                      size="large"
+                      onClick={handleStart}
+                      disabled={!inputValue.trim() || isSettingPlayer}
+                      sx={{
+                        bgcolor: '#fff',
+                        color: '#6d28d9',
+                        fontWeight: 900,
+                        fontSize: { xs: '1.1rem', md: '1.25rem' },
+                        py: { xs: 1.75, md: 2 },
+                        borderRadius: 99,
+                        boxShadow: '0 8px 28px rgba(0,0,0,0.28)',
+                        '&:hover': {
+                          bgcolor: '#f5f3ff',
+                          transform: 'translateY(-3px)',
+                          boxShadow: '0 14px 36px rgba(0,0,0,0.35)',
+                        },
+                        '&:disabled': { bgcolor: 'rgba(255,255,255,0.3)', color: 'rgba(255,255,255,0.5)' },
+                        transition: 'all 0.22s ease',
+                      }}
+                    >
+                      {isSettingPlayer ? (
+                        <CircularProgress size={22} sx={{ color: '#6d28d9' }} />
+                      ) : (
+                        '🚀 Start Adventure!'
+                      )}
+                    </Button>
+                  </Box>
+                </motion.div>
+              ) : (
+                /* ── Has player: show play + studio buttons ──────────────── */
+                <motion.div
+                  key="play-buttons"
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                    <Button
+                      fullWidth
+                      size="large"
+                      onClick={() => goToScreen('categories')}
+                      sx={{
+                        bgcolor: '#fff',
+                        color: '#6d28d9',
+                        fontWeight: 900,
+                        fontSize: { xs: '1.1rem', md: '1.25rem' },
+                        py: { xs: 1.75, md: 2 },
+                        borderRadius: 99,
+                        boxShadow: '0 8px 28px rgba(0,0,0,0.28)',
+                        letterSpacing: '0.01em',
+                        '&:hover': {
+                          bgcolor: '#f5f3ff',
+                          transform: 'translateY(-3px)',
+                          boxShadow: '0 14px 36px rgba(0,0,0,0.35)',
+                        },
+                        transition: 'all 0.22s ease',
+                      }}
+                    >
+                      🚀 Let's Play!
+                    </Button>
+                    <Button
+                      fullWidth
+                      onClick={() => goToScreen('editor')}
+                      sx={{
+                        color: '#fff',
+                        border: '1.5px solid rgba(255,255,255,0.4)',
+                        fontWeight: 800,
+                        fontSize: { xs: '0.95rem', md: '1rem' },
+                        py: { xs: 1.1, md: 1.2 },
+                        borderRadius: 99,
+                        bgcolor: 'rgba(255,255,255,0.08)',
+                        '&:hover': {
+                          bgcolor: 'rgba(255,255,255,0.16)',
+                          borderColor: 'rgba(255,255,255,0.6)',
+                        },
+                      }}
+                    >
+                      🛠️ Content Studio
+                    </Button>
+                    {/* Change player */}
+                    <Button
+                      size="small"
+                      onClick={clearPlayer}
+                      sx={{
+                        color: 'rgba(255,255,255,0.35)',
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        '&:hover': { color: 'rgba(255,255,255,0.7)' },
+                      }}
+                    >
+                      Not {playerUsername}? Change player
+                    </Button>
+                  </Box>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         </Box>
       </motion.div>

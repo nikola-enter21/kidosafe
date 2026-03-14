@@ -4,17 +4,13 @@ import ArrowBackRounded from '@mui/icons-material/ArrowBackRounded'
 import ArrowDownwardRounded from '@mui/icons-material/ArrowDownwardRounded'
 import ArrowUpwardRounded from '@mui/icons-material/ArrowUpwardRounded'
 import DeleteOutlineRounded from '@mui/icons-material/DeleteOutlineRounded'
-import DownloadRounded from '@mui/icons-material/DownloadRounded'
-import RestartAltRounded from '@mui/icons-material/RestartAltRounded'
 import SaveRounded from '@mui/icons-material/SaveRounded'
-import UploadRounded from '@mui/icons-material/UploadRounded'
 import { type ChangeEvent, useEffect, useMemo, useRef, useState } from 'react'
 
 import { useGameStore } from '@/entities/game/model/gameStore'
 import { CATEGORIES, getCategoryById } from '@/entities/scenario/model/categories'
 import type { ContentDataset } from '@/entities/scenario/model/contentTypes'
 import {
-  exportDataset,
   getActiveDataset,
   importDataset,
   saveDataset,
@@ -24,11 +20,14 @@ import type { CategoryId } from '@/shared/types/game'
 
 const CATEGORY_IDS = CATEGORIES.map(c => c.id) as CategoryId[]
 
-type VideoField =
+type MediaField =
   | 'videoUrl'
   | 'questionVideoUrl'
   | 'wrongVideoUrl'
   | 'correctVideoUrl'
+  | 'imageUrl'
+  | 'imageUrlCorrect'
+  | 'imageUrlWrong'
 
 function cloneDataset(dataset: ContentDataset): ContentDataset {
   return JSON.parse(JSON.stringify(dataset)) as ContentDataset
@@ -78,16 +77,6 @@ function createScenarioTemplate(category: CategoryId, index: number): Scenario {
   }
 }
 
-function downloadJsonFile(content: string, fileName: string) {
-  const blob = new Blob([content], { type: 'application/json' })
-  const href = URL.createObjectURL(blob)
-  const anchor = document.createElement('a')
-  anchor.href = href
-  anchor.download = fileName
-  anchor.click()
-  URL.revokeObjectURL(href)
-}
-
 export function EditorPage() {
   const goToScreen = useGameStore(s => s.goToScreen)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -99,7 +88,6 @@ export function EditorPage() {
   const [message, setMessage] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // Load initial dataset from backend
   useEffect(() => {
     getActiveDataset()
       .then(data => {
@@ -149,7 +137,7 @@ export function EditorPage() {
     )
   }
 
-  const updateOptionalVideoField = (field: VideoField, rawValue: string) => {
+  const updateOptionalMediaField = (field: MediaField, rawValue: string) => {
     updateSelectedScenario(item => {
       const value = rawValue.trim()
       if (value) {
@@ -160,6 +148,19 @@ export function EditorPage() {
       delete next[field]
       return next as Scenario
     })
+  }
+
+  const updateChoiceField = (
+    index: number,
+    field: keyof Pick<Choice, 'text' | 'feedback' | 'feedbackEmoji'>,
+    value: string,
+  ) => {
+    updateSelectedScenario(item => ({
+      ...item,
+      choices: item.choices.map((entry, i) =>
+        i === index ? { ...entry, [field]: value } : entry,
+      ),
+    }))
   }
 
   const handleAddScenario = () => {
@@ -217,38 +218,6 @@ export function EditorPage() {
       setError(saveError instanceof Error ? saveError.message : 'Failed to save content.')
       setMessage(null)
     }
-  }
-
-  const handleReset = async () => {
-    try {
-      const reloaded = await getActiveDataset()
-      setDataset(reloaded)
-      const firstCategory = (reloaded.categories[0] as CategoryId) ?? 'home-alone'
-      setSelectedCategory(firstCategory)
-      setSelectedScenarioId(reloaded.scenariosByCategory[firstCategory]?.[0]?.id ?? null)
-      setMessage('Dataset reloaded from server.')
-      setError(null)
-    } catch {
-      setError('Failed to reload from server.')
-    }
-  }
-
-  const handleExport = async () => {
-    try {
-      const json = await exportDataset()
-      downloadJsonFile(
-        json,
-        `kidosafe-content-v1-${new Date().toISOString().slice(0, 10)}.json`,
-      )
-      setMessage('Dataset exported.')
-      setError(null)
-    } catch {
-      setError('Failed to export dataset.')
-    }
-  }
-
-  const handleImportClick = () => {
-    fileInputRef.current?.click()
   }
 
   const handleImportFile = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -334,30 +303,6 @@ export function EditorPage() {
         <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
           <Button startIcon={<SaveRounded />} variant="contained" onClick={handleSave}>
             Save
-          </Button>
-          <Button
-            startIcon={<UploadRounded />}
-            variant="outlined"
-            onClick={handleImportClick}
-            sx={{ color: '#fff', borderColor: 'rgba(255,255,255,0.4)' }}
-          >
-            Import JSON
-          </Button>
-          <Button
-            startIcon={<DownloadRounded />}
-            variant="outlined"
-            onClick={handleExport}
-            sx={{ color: '#fff', borderColor: 'rgba(255,255,255,0.4)' }}
-          >
-            Export JSON
-          </Button>
-          <Button
-            startIcon={<RestartAltRounded />}
-            variant="outlined"
-            onClick={handleReset}
-            sx={{ color: '#fff', borderColor: 'rgba(255,255,255,0.4)' }}
-          >
-            Reload
           </Button>
         </Stack>
       </Box>
@@ -541,7 +486,7 @@ export function EditorPage() {
                 label="Video URL / Path"
                 placeholder="/videos/my-video.mp4 or https://..."
                 value={selectedScenario.videoUrl ?? ''}
-                onChange={event => updateOptionalVideoField('videoUrl', event.target.value)}
+                onChange={event => updateOptionalMediaField('videoUrl', event.target.value)}
                 fullWidth
                 sx={{
                   '& .MuiInputBase-root': { color: '#fff', bgcolor: 'rgba(255,255,255,0.03)' },
@@ -556,7 +501,7 @@ export function EditorPage() {
                 label="Question video URL / Path (part_1)"
                 placeholder="/homealone/kontakt/new_style_part_1.mp4"
                 value={selectedScenario.questionVideoUrl ?? ''}
-                onChange={event => updateOptionalVideoField('questionVideoUrl', event.target.value)}
+                onChange={event => updateOptionalMediaField('questionVideoUrl', event.target.value)}
                 fullWidth
                 sx={{
                   '& .MuiInputBase-root': { color: '#fff', bgcolor: 'rgba(255,255,255,0.03)' },
@@ -567,7 +512,7 @@ export function EditorPage() {
                 label="Wrong answer video URL / Path (part_2)"
                 placeholder="/homealone/kontakt/new_style_part_2.mp4"
                 value={selectedScenario.wrongVideoUrl ?? ''}
-                onChange={event => updateOptionalVideoField('wrongVideoUrl', event.target.value)}
+                onChange={event => updateOptionalMediaField('wrongVideoUrl', event.target.value)}
                 fullWidth
                 sx={{
                   '& .MuiInputBase-root': { color: '#fff', bgcolor: 'rgba(255,255,255,0.03)' },
@@ -578,7 +523,7 @@ export function EditorPage() {
                 label="Correct answer video URL / Path (part_3)"
                 placeholder="/homealone/kontakt/new_style_part_3.mp4"
                 value={selectedScenario.correctVideoUrl ?? ''}
-                onChange={event => updateOptionalVideoField('correctVideoUrl', event.target.value)}
+                onChange={event => updateOptionalMediaField('correctVideoUrl', event.target.value)}
                 fullWidth
                 sx={{
                   '& .MuiInputBase-root': { color: '#fff', bgcolor: 'rgba(255,255,255,0.03)' },
@@ -589,49 +534,149 @@ export function EditorPage() {
                 Triplet video flow requires all 3 fields: question + wrong + correct.
               </Typography>
 
-              <Typography sx={{ fontWeight: 700, mt: 0.5 }}>
-                Answers (exactly 3, one correct)
+              {/* ── Description ───────────────────────────────────────── */}
+              <TextField
+                label="Description"
+                multiline
+                minRows={2}
+                placeholder="Describe what happens in this scenario (used for AI matching)"
+                value={selectedScenario.description ?? ''}
+                onChange={event =>
+                  updateSelectedScenario(item => ({
+                    ...item,
+                    description: event.target.value || undefined,
+                  }))
+                }
+                fullWidth
+                sx={{
+                  '& .MuiInputBase-root': { color: '#fff', bgcolor: 'rgba(255,255,255,0.03)' },
+                  '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.65)' },
+                }}
+              />
+
+              {/* ── Image triplet fields ──────────────────────────────── */}
+              <Typography sx={{ fontWeight: 700, fontSize: '0.85rem', color: 'rgba(255,255,255,0.8)', mt: 0.5 }}>
+                🖼️ Image URLs (optional — shown when no video is set)
+              </Typography>
+              <TextField
+                label="Question Image URL / Path"
+                placeholder="/images/scenario-question.jpg"
+                value={selectedScenario.imageUrl ?? ''}
+                onChange={event => updateOptionalMediaField('imageUrl', event.target.value)}
+                fullWidth
+                sx={{
+                  '& .MuiInputBase-root': { color: '#fff', bgcolor: 'rgba(255,255,255,0.03)' },
+                  '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.65)' },
+                }}
+              />
+              <TextField
+                label="Wrong answer Image URL / Path"
+                placeholder="/images/scenario-wrong.jpg"
+                value={selectedScenario.imageUrlWrong ?? ''}
+                onChange={event => updateOptionalMediaField('imageUrlWrong', event.target.value)}
+                fullWidth
+                sx={{
+                  '& .MuiInputBase-root': { color: '#fff', bgcolor: 'rgba(255,255,255,0.03)' },
+                  '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.65)' },
+                }}
+              />
+              <TextField
+                label="Correct answer Image URL / Path"
+                placeholder="/images/scenario-correct.jpg"
+                value={selectedScenario.imageUrlCorrect ?? ''}
+                onChange={event => updateOptionalMediaField('imageUrlCorrect', event.target.value)}
+                fullWidth
+                sx={{
+                  '& .MuiInputBase-root': { color: '#fff', bgcolor: 'rgba(255,255,255,0.03)' },
+                  '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.65)' },
+                }}
+              />
+              <Typography sx={{ color: 'rgba(255,255,255,0.62)', fontSize: '0.78rem', mt: -1 }}>
+                Image triplet flow — fallback when no video URL is set for that state.
               </Typography>
 
-              <Stack spacing={1.15}>
+              <Typography sx={{ fontWeight: 700, mt: 0.5 }}>
+                Answers <Typography component="span" sx={{ fontWeight: 400, fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>(select radio = correct answer)</Typography>
+              </Typography>
+
+              <Stack spacing={2}>
                 {selectedScenario.choices.map((choice, index) => (
-                  <Stack key={choice.id} direction="row" spacing={1} alignItems="center">
-                    <Radio
-                      checked={choice.isCorrect}
-                      onChange={() =>
-                        updateSelectedScenario(item => ({
-                          ...item,
-                          choices: item.choices.map((entry, choiceIndex) => ({
-                            ...entry,
-                            isCorrect: choiceIndex === index,
-                          })),
-                        }))
-                      }
-                      sx={{ color: '#fff' }}
-                    />
-                    <TextField
-                      label={`Answer ${index + 1}`}
-                      value={choice.text}
-                      onChange={event =>
-                        updateSelectedScenario(item => ({
-                          ...item,
-                          choices: item.choices.map((entry, choiceIndex) =>
-                            choiceIndex === index
-                              ? { ...entry, text: event.target.value }
-                              : entry,
-                          ),
-                        }))
-                      }
-                      fullWidth
-                      sx={{
-                        '& .MuiInputBase-root': {
-                          color: '#fff',
-                          bgcolor: 'rgba(255,255,255,0.03)',
-                        },
-                        '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.65)' },
-                      }}
-                    />
-                  </Stack>
+                  <Box
+                    key={choice.id}
+                    sx={{
+                      bgcolor: choice.isCorrect
+                        ? 'rgba(16,185,129,0.07)'
+                        : 'rgba(255,255,255,0.03)',
+                      border: `1px solid ${choice.isCorrect ? 'rgba(16,185,129,0.3)' : 'rgba(255,255,255,0.08)'}`,
+                      borderRadius: 2,
+                      p: 1.5,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 1,
+                    }}
+                  >
+                    {/* Row 1: Radio + Answer text + Feedback emoji */}
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Radio
+                        checked={choice.isCorrect}
+                        onChange={() =>
+                          updateSelectedScenario(item => ({
+                            ...item,
+                            choices: item.choices.map((entry, choiceIndex) => ({
+                              ...entry,
+                              isCorrect: choiceIndex === index,
+                            })),
+                          }))
+                        }
+                        sx={{ color: choice.isCorrect ? '#10b981' : 'rgba(255,255,255,0.5)', p: 0.5 }}
+                      />
+                      <TextField
+                        label={`Answer ${index + 1}`}
+                        value={choice.text}
+                        onChange={event => updateChoiceField(index, 'text', event.target.value)}
+                        fullWidth
+                        sx={{
+                          '& .MuiInputBase-root': { color: '#fff', bgcolor: 'rgba(255,255,255,0.03)' },
+                          '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.65)' },
+                        }}
+                      />
+                      <TextField
+                        label="Emoji"
+                        value={choice.feedbackEmoji}
+                        onChange={event => updateChoiceField(index, 'feedbackEmoji', event.target.value)}
+                        sx={{
+                          width: 86,
+                          flexShrink: 0,
+                          '& .MuiInputBase-root': { color: '#fff', bgcolor: 'rgba(255,255,255,0.03)', fontSize: '1.2rem' },
+                          '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.65)' },
+                        }}
+                        inputProps={{ maxLength: 4 }}
+                      />
+                    </Stack>
+
+                    {/* Row 2: Feedback message */}
+                    <Box sx={{ pl: '44px' }}>
+                      <TextField
+                        label={`Feedback — ${choice.isCorrect ? 'Correct ✅' : 'Wrong ❌'}`}
+                        multiline
+                        minRows={2}
+                        value={choice.feedback}
+                        onChange={event => updateChoiceField(index, 'feedback', event.target.value)}
+                        fullWidth
+                        placeholder={
+                          choice.isCorrect
+                            ? 'Great choice! That is the safest option.'
+                            : 'Not the safest option. Think about what could happen.'
+                        }
+                        sx={{
+                          '& .MuiInputBase-root': { color: '#fff', bgcolor: 'rgba(255,255,255,0.03)' },
+                          '& .MuiInputLabel-root': {
+                            color: choice.isCorrect ? 'rgba(52,211,153,0.85)' : 'rgba(252,165,165,0.85)',
+                          },
+                        }}
+                      />
+                    </Box>
+                  </Box>
                 ))}
               </Stack>
             </Stack>

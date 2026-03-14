@@ -4,7 +4,7 @@
  */
 import { del, get, post, put } from '@/shared/api/http'
 import type { Scenario, Choice } from '@/entities/scenario/model/types'
-import type { CategoryId } from '@/shared/types/game'
+import type { CategoryId, Player } from '@/shared/types/game'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -90,3 +90,22 @@ export const updateChoice = (id: string, data: Partial<Choice>) =>
 /** DELETE /api/choices/{id}/ */
 export const deleteChoice = (id: string) =>
   del(`/api/choices/${id}/`)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Players
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** POST /api/players/ → get_or_create by username */
+export const getOrCreatePlayer = (username: string) =>
+  post<Player>('/api/players/', { username })
+
+export interface RecordSessionPayload {
+  categoryId: CategoryId
+  correctAnswers: number
+  totalAnswers: number
+  pointsEarned: number
+}
+
+/** POST /api/players/{id}/record-session/ */
+export const recordSession = (playerId: number, data: RecordSessionPayload) =>
+  post<Player>(`/api/players/${playerId}/record-session/`, data)

@@ -23,9 +23,12 @@ export interface Scenario {
   watchTime: number
   tip: string
   choices: Choice[]
+  description?: string
   videoUrl?: string
   questionVideoUrl?: string
   wrongVideoUrl?: string
   correctVideoUrl?: string
   imageUrl?: string
+  imageUrlCorrect?: string
+  imageUrlWrong?: string
 }

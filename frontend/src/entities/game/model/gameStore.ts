@@ -1,12 +1,25 @@
 import { create } from 'zustand'
 
-import { getCategoryScenarios } from '@/shared/api/contentApi'
-import type { AnswerRecord, CategoryId, GameResult, Screen } from '@/shared/types/game'
+import { getCategoryScenarios, getOrCreatePlayer, recordSession } from '@/shared/api/contentApi'
+import type { AnswerRecord, CategoryId, GameResult, Player, Screen } from '@/shared/types/game'
 import type { Scenario } from '@/entities/scenario/model/types'
 
 const MAX_LIVES = 3
 const POINTS_CORRECT = 100
 const STREAK_BONUS = 50
+
+const LS_PLAYER_ID = 'kidosafe_player_id'
+const LS_USERNAME = 'kidosafe_username'
+
+// ── Load persisted player from localStorage ──────────────────────────────────
+function loadPersistedPlayer(): { playerId: number | null; playerUsername: string | null } {
+  try {
+    const id = localStorage.getItem(LS_PLAYER_ID)
+    const username = localStorage.getItem(LS_USERNAME)
+    if (id && username) return { playerId: Number(id), playerUsername: username }
+  } catch { /* ignore */ }
+  return { playerId: null, playerUsername: null }
+}
 
 interface GameStore {
   screen: Screen
@@ -19,6 +32,13 @@ interface GameStore {
   answers: AnswerRecord[]
   lastResult: GameResult | null
   isLoadingScenarios: boolean
+
+  // Player
+  playerId: number | null
+  playerUsername: string | null
+  isSettingPlayer: boolean
+  setPlayer: (username: string) => Promise<void>
+  clearPlayer: () => void
 
   goToScreen: (screen: Screen) => void
   selectCategory: (id: CategoryId) => Promise<void>
@@ -35,6 +55,8 @@ function calcStars(correct: number, total: number): 1 | 2 | 3 {
   return 1
 }
 
+const { playerId: persistedId, playerUsername: persistedUsername } = loadPersistedPlayer()
+
 export const useGameStore = create<GameStore>((set, get) => ({
   screen: 'home',
   selectedCategory: null,
@@ -47,6 +69,32 @@ export const useGameStore = create<GameStore>((set, get) => ({
   lastResult: null,
   isLoadingScenarios: false,
 
+  // ── Player ─────────────────────────────────────────────────────────────────
+  playerId: persistedId,
+  playerUsername: persistedUsername,
+  isSettingPlayer: false,
+
+  setPlayer: async (username: string) => {
+    const trimmed = username.trim()
+    if (!trimmed) return
+    set({ isSettingPlayer: true })
+    try {
+      const player: Player = await getOrCreatePlayer(trimmed)
+      localStorage.setItem(LS_PLAYER_ID, String(player.id))
+      localStorage.setItem(LS_USERNAME, player.username)
+      set({ playerId: player.id, playerUsername: player.username, isSettingPlayer: false })
+    } catch {
+      set({ isSettingPlayer: false })
+    }
+  },
+
+  clearPlayer: () => {
+    localStorage.removeItem(LS_PLAYER_ID)
+    localStorage.removeItem(LS_USERNAME)
+    set({ playerId: null, playerUsername: null })
+  },
+
+  // ── Navigation ─────────────────────────────────────────────────────────────
   goToScreen: (screen) => set({ screen }),
 
   selectCategory: async (id) => {
@@ -111,8 +159,20 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   nextScenario: () => {
-    const { currentIndex, scenarios, lives, lastResult } = get()
-    if (lastResult || lives === 0 || currentIndex >= scenarios.length - 1) {
+    const { currentIndex, scenarios, lives, lastResult, playerId, score, selectedCategory, answers } = get()
+    const shouldEnd = lastResult || lives === 0 || currentIndex >= scenarios.length - 1
+
+    if (shouldEnd) {
+      // Record session to backend if player is logged in
+      if (playerId && selectedCategory) {
+        const correctCount = answers.filter(a => a.isCorrect).length
+        void recordSession(playerId, {
+          categoryId: selectedCategory,
+          correctAnswers: correctCount,
+          totalAnswers: answers.length,
+          pointsEarned: score,
+        })
+      }
       set({ screen: 'result' })
       return
     }
