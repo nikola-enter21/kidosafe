@@ -55,35 +55,32 @@ class ScenarioSerializer(serializers.ModelSerializer):
     Full CRUD serializer for Scenario with nested choices and scene config.
 
     Mapping:
-      watch_time  ↔  watchTime
-      video_url   ↔  videoUrl
-      image_url   ↔  imageUrl
-      scene_*     ↔  scene: { background, emoji, label }
+      watch_time         ↔  watchTime
+      question_video_url ↔  questionVideoUrl
+      wrong_video_url    ↔  wrongVideoUrl
+      correct_video_url  ↔  correctVideoUrl
+      scene_*            ↔  scene: { background, emoji, label }
     """
     watchTime = serializers.IntegerField(source='watch_time', required=False, default=4)
-    videoUrl = serializers.CharField(
-        source='video_url', required=False, allow_blank=True, default=''
+    questionVideoUrl = serializers.CharField(
+        source='question_video_url', required=False, allow_blank=True, default=''
     )
-    imageUrl = serializers.CharField(
-        source='image_url', required=False, allow_blank=True, default=''
+    wrongVideoUrl = serializers.CharField(
+        source='wrong_video_url', required=False, allow_blank=True, default=''
     )
-    followUpVideoUrl = serializers.CharField(
-        source='follow_up_video_url', required=False, allow_blank=True, default=''
+    correctVideoUrl = serializers.CharField(
+        source='correct_video_url', required=False, allow_blank=True, default=''
     )
-    followUpImageUrl = serializers.CharField(
-        source='follow_up_image_url', required=False, allow_blank=True, default=''
-    )
-    followUpCaption = serializers.CharField(
-        source='follow_up_caption', required=False, allow_blank=True, default=''
-    )
+    # Legacy alias from older editor payloads; mapped to question_video_url in to_internal_value.
+    videoUrl = serializers.CharField(required=False, allow_blank=True, write_only=True, default='')
     choices = ChoiceSerializer(many=True, required=False)
 
     class Meta:
         model = Scenario
         fields = [
             'id', 'category', 'question', 'watchTime', 'tip',
-            'videoUrl', 'imageUrl',
-            'followUpVideoUrl', 'followUpImageUrl', 'followUpCaption',
+            'videoUrl',
+            'questionVideoUrl', 'wrongVideoUrl', 'correctVideoUrl',
             'choices',
         ]
         extra_kwargs = {
@@ -94,6 +91,8 @@ class ScenarioSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
+        # Keep legacy key for frontend compatibility (single-video flow).
+        data['videoUrl'] = data.get('questionVideoUrl', '')
         data['scene'] = {
             'background': instance.scene_background,
             'emoji': instance.scene_emoji,
@@ -104,22 +103,30 @@ class ScenarioSerializer(serializers.ModelSerializer):
     # ── WRITE: extract scene from input before validation ─────────────────
 
     def to_internal_value(self, data):
-        # Pull out 'scene' before calling super so DRF doesn't reject it
+        # Pull out 'scene' before calling super so DRF doesn't reject it.
         if isinstance(data, dict):
+            scene_was_provided = 'scene' in data
             scene = data.get('scene') or {}
             remaining = {k: v for k, v in data.items() if k != 'scene'}
         else:
+            scene_was_provided = False
             scene = {}
             remaining = data
 
         result = super().to_internal_value(remaining)
 
-        # Merge scene fields into validated data
-        result['scene_background'] = scene.get(
-            'background', 'linear-gradient(135deg,#667eea,#764ba2)'
-        )
-        result['scene_emoji'] = scene.get('emoji', '🎯')
-        result['scene_label'] = scene.get('label', 'Safety Scenario')
+        # Legacy field alias: videoUrl -> question_video_url (unless explicit questionVideoUrl exists).
+        legacy_video_url = result.pop('videoUrl', '')
+        if legacy_video_url and not result.get('question_video_url'):
+            result['question_video_url'] = legacy_video_url
+
+        # Merge scene fields into validated data only when scene is explicitly present.
+        if scene_was_provided:
+            result['scene_background'] = scene.get(
+                'background', 'linear-gradient(135deg,#667eea,#764ba2)'
+            )
+            result['scene_emoji'] = scene.get('emoji', '🎯')
+            result['scene_label'] = scene.get('label', 'Safety Scenario')
         return result
 
     # ── CREATE ────────────────────────────────────────────────────────────
@@ -158,19 +165,16 @@ class ScenarioSerializer(serializers.ModelSerializer):
 class ScenarioListSerializer(serializers.ModelSerializer):
     """Compact serializer used in list views to avoid N+1 on choices."""
     watchTime = serializers.IntegerField(source='watch_time')
-    videoUrl = serializers.CharField(source='video_url', allow_blank=True)
-    imageUrl = serializers.CharField(source='image_url', allow_blank=True)
-    followUpVideoUrl = serializers.CharField(source='follow_up_video_url', allow_blank=True)
-    followUpImageUrl = serializers.CharField(source='follow_up_image_url', allow_blank=True)
-    followUpCaption = serializers.CharField(source='follow_up_caption', allow_blank=True)
+    questionVideoUrl = serializers.CharField(source='question_video_url', allow_blank=True)
+    wrongVideoUrl = serializers.CharField(source='wrong_video_url', allow_blank=True)
+    correctVideoUrl = serializers.CharField(source='correct_video_url', allow_blank=True)
     choiceCount = serializers.SerializerMethodField()
 
     class Meta:
         model = Scenario
         fields = [
             'id', 'category', 'question', 'watchTime', 'tip',
-            'videoUrl', 'imageUrl',
-            'followUpVideoUrl', 'followUpImageUrl', 'followUpCaption',
+            'questionVideoUrl', 'wrongVideoUrl', 'correctVideoUrl',
             'choiceCount', 'order',
         ]
 
@@ -179,6 +183,8 @@ class ScenarioListSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
+        # Keep legacy key for frontend compatibility (single-video flow).
+        data['videoUrl'] = data.get('questionVideoUrl', '')
         data['scene'] = {
             'background': instance.scene_background,
             'emoji': instance.scene_emoji,

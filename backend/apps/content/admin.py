@@ -59,7 +59,7 @@ class ScenarioAdmin(admin.ModelAdmin):
             'fields': ('question', 'watch_time', 'tip'),
         }),
         ('Media', {
-            'fields': ('video_url', 'image_url'),
+            'fields': ('question_video_url', 'wrong_video_url', 'correct_video_url'),
             'classes': ('collapse',),
         }),
         ('Scene Config', {
