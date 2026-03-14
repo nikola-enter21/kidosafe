@@ -640,18 +640,18 @@ export function EditorPage() {
                           '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.65)' },
                         }}
                       />
-                      <TextField
-                        label="Emoji"
-                        value={choice.feedbackEmoji}
-                        onChange={event => updateChoiceField(index, 'feedbackEmoji', event.target.value)}
-                        sx={{
-                          width: 86,
-                          flexShrink: 0,
-                          '& .MuiInputBase-root': { color: '#fff', bgcolor: 'rgba(255,255,255,0.03)', fontSize: '1.2rem' },
-                          '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.65)' },
-                        }}
-                        inputProps={{ maxLength: 4 }}
-                      />
+                      {/*<TextField*/}
+                      {/*  label="Emoji"*/}
+                      {/*  value={choice.feedbackEmoji}*/}
+                      {/*  onChange={event => updateChoiceField(index, 'feedbackEmoji', event.target.value)}*/}
+                      {/*  sx={{*/}
+                      {/*    width: 86,*/}
+                      {/*    flexShrink: 0,*/}
+                      {/*    '& .MuiInputBase-root': { color: '#fff', bgcolor: 'rgba(255,255,255,0.03)', fontSize: '1.2rem' },*/}
+                      {/*    '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.65)' },*/}
+                      {/*  }}*/}
+                      {/*  inputProps={{ maxLength: 4 }}*/}
+                      {/*/>*/}
                     </Stack>
 
                     {/* Row 2: Feedback message */}

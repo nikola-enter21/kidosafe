@@ -30,20 +30,33 @@ class CategorySerializer(serializers.ModelSerializer):
 class ChoiceSerializer(serializers.ModelSerializer):
     """
     CRUD serializer for Choice.
-    Maps is_correct ↔ isCorrect and feedback_emoji ↔ feedbackEmoji.
+    Maps is_correct ↔ isCorrect (via source=) and feedback_emoji ↔ feedbackEmoji (via overrides).
+    feedbackEmoji is handled explicitly in to_internal_value / to_representation to guarantee
+    it is written to the DB — DRF's source= mapping can be unreliable in nested ListSerializer context.
     """
     isCorrect = serializers.BooleanField(source='is_correct', required=False, default=False)
-    feedbackEmoji = serializers.CharField(source='feedback_emoji', required=False, default='⭐')
 
     class Meta:
         model = Choice
-        fields = ['id', 'text', 'emoji', 'isCorrect', 'feedback', 'feedbackEmoji', 'order']
+        fields = ['id', 'text', 'emoji', 'isCorrect', 'feedback', 'order']
         extra_kwargs = {
             'id': {'required': False, 'validators': []},  # skip unique check; update() deletes then recreates
             'emoji': {'required': False, 'default': '🔹'},
             'feedback': {'required': False, 'default': ''},
             'order': {'required': False, 'default': 0},
         }
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['feedbackEmoji'] = instance.feedback_emoji
+        return data
+
+    def to_internal_value(self, data):
+        mutable = dict(data)
+        feedback_emoji = mutable.pop('feedbackEmoji', '⭐')
+        result = super().to_internal_value(mutable)
+        result['feedback_emoji'] = feedback_emoji
+        return result
 
 
 # ─────────────────────────────────────────────────────────────────────────────
