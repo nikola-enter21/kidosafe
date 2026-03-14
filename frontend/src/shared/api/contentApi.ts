@@ -1,0 +1,92 @@
+/**
+ * Content API – all calls to the Django REST backend.
+ * Base URL is controlled by VITE_API_BASE_URL (default: http://localhost:8000).
+ */
+import { del, get, post, put } from '@/shared/api/http'
+import type { Scenario, Choice } from '@/entities/scenario/model/types'
+import type { CategoryId } from '@/shared/types/game'
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Types
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface ApiCategory {
+  id: CategoryId
+  label: string
+  emoji: string
+  color: string
+  colorLight: string
+  colorDark: string
+  description: string
+  scenarioCount: number
+}
+
+export interface ExportDataset {
+  version: number
+  categories: CategoryId[]
+  scenariosByCategory: Record<CategoryId, Scenario[]>
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Categories
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** GET /api/categories/ */
+export const getCategories = () =>
+  get<ApiCategory[]>('/api/categories/')
+
+/** GET /api/categories/{id}/scenarios/ – full Scenario objects with choices */
+export const getCategoryScenarios = (catId: CategoryId) =>
+  get<Scenario[]>(`/api/categories/${catId}/scenarios/`)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Scenarios
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** GET /api/scenarios/{id}/ */
+export const getScenario = (id: string) =>
+  get<Scenario>(`/api/scenarios/${id}/`)
+
+/** POST /api/scenarios/ – create with optional nested choices */
+export const createScenario = (data: Omit<Scenario, 'id'> & { id?: string }) =>
+  post<Scenario>('/api/scenarios/', data)
+
+/** PUT /api/scenarios/{id}/ – full replace (choices array replaces all existing) */
+export const updateScenario = (id: string, data: Partial<Scenario>) =>
+  put<Scenario>(`/api/scenarios/${id}/`, data)
+
+/** PATCH /api/scenarios/{id}/ – partial update */
+export const patchScenario = (id: string, data: Partial<Scenario>) =>
+  put<Scenario>(`/api/scenarios/${id}/`, data)   // reuse PUT for simplicity
+
+/** DELETE /api/scenarios/{id}/ */
+export const deleteScenario = (id: string) =>
+  del(`/api/scenarios/${id}/`)
+
+/** GET /api/scenarios/export – full dataset for JSON download */
+export const exportDatasetFromApi = () =>
+  get<ExportDataset>('/api/scenarios/export')
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Choices
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** GET /api/scenarios/{id}/choices/ */
+export const getScenarioChoices = (scenarioId: string) =>
+  get<Choice[]>(`/api/scenarios/${scenarioId}/choices/`)
+
+/** POST /api/scenarios/{id}/choices/ – add single choice */
+export const addChoice = (scenarioId: string, data: Partial<Choice>) =>
+  post<Choice>(`/api/scenarios/${scenarioId}/choices/`, data)
+
+/** PUT /api/scenarios/{id}/choices/bulk – replace ALL choices at once */
+export const bulkReplaceChoices = (scenarioId: string, choices: Partial<Choice>[]) =>
+  put<Choice[]>(`/api/scenarios/${scenarioId}/choices/bulk`, choices)
+
+/** PUT /api/choices/{id}/ */
+export const updateChoice = (id: string, data: Partial<Choice>) =>
+  put<Choice>(`/api/choices/${id}/`, data)
+
+/** DELETE /api/choices/{id}/ */
+export const deleteChoice = (id: string) =>
+  del(`/api/choices/${id}/`)
