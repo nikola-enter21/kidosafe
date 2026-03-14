@@ -88,6 +88,12 @@ function normalizeChoice(
   }
 }
 
+function normalizeOptionalString(value: unknown): string | undefined {
+  if (typeof value !== 'string') return undefined
+  const trimmed = value.trim()
+  return trimmed ? trimmed : undefined
+}
+
 function normalizeScenario(
   value: unknown,
   category: CategoryId,
@@ -143,14 +149,15 @@ function normalizeScenario(
       ? Math.floor(watchTimeValue)
       : 4
 
-  const videoUrl =
-    typeof candidate.videoUrl === 'string' && candidate.videoUrl.trim()
-      ? candidate.videoUrl.trim()
-      : undefined
-  const imageUrl =
-    typeof candidate.imageUrl === 'string' && candidate.imageUrl.trim()
-      ? candidate.imageUrl.trim()
-      : undefined
+  const videoUrl = normalizeOptionalString(candidate.videoUrl)
+  const questionVideoUrl = normalizeOptionalString(candidate.questionVideoUrl)
+  const wrongVideoUrl = normalizeOptionalString(candidate.wrongVideoUrl)
+  const correctVideoUrl = normalizeOptionalString(candidate.correctVideoUrl)
+  const imageUrl = normalizeOptionalString(candidate.imageUrl)
+
+  const hasAnyTripletVideo = Boolean(questionVideoUrl || wrongVideoUrl || correctVideoUrl)
+  const hasFullTripletVideo = Boolean(questionVideoUrl && wrongVideoUrl && correctVideoUrl)
+  if (hasAnyTripletVideo && !hasFullTripletVideo) return null
 
   return {
     id,
@@ -161,6 +168,9 @@ function normalizeScenario(
     tip,
     choices,
     ...(videoUrl ? { videoUrl } : {}),
+    ...(questionVideoUrl ? { questionVideoUrl } : {}),
+    ...(wrongVideoUrl ? { wrongVideoUrl } : {}),
+    ...(correctVideoUrl ? { correctVideoUrl } : {}),
     ...(imageUrl ? { imageUrl } : {}),
   }
 }
@@ -231,7 +241,23 @@ function validateAndNormalizeDataset(raw: unknown): ValidationResult {
 
     const normalizedScenarios: Scenario[] = []
     for (let index = 0; index < categoryScenariosRaw.length; index++) {
-      const scenario = normalizeScenario(categoryScenariosRaw[index], categoryId, index)
+      const rawScenario = categoryScenariosRaw[index]
+      if (rawScenario && typeof rawScenario === 'object') {
+        const candidate = rawScenario as Record<string, unknown>
+        const questionVideoUrl = normalizeOptionalString(candidate.questionVideoUrl)
+        const wrongVideoUrl = normalizeOptionalString(candidate.wrongVideoUrl)
+        const correctVideoUrl = normalizeOptionalString(candidate.correctVideoUrl)
+        const hasAnyTripletVideo = Boolean(questionVideoUrl || wrongVideoUrl || correctVideoUrl)
+        const hasFullTripletVideo = Boolean(questionVideoUrl && wrongVideoUrl && correctVideoUrl)
+        if (hasAnyTripletVideo && !hasFullTripletVideo) {
+          return {
+            ok: false,
+            error: `Scenario at ${categoryId}[${index}] has incomplete triplet videos. Provide questionVideoUrl, wrongVideoUrl and correctVideoUrl.`,
+          }
+        }
+      }
+
+      const scenario = normalizeScenario(rawScenario, categoryId, index)
       if (!scenario) {
         return {
           ok: false,

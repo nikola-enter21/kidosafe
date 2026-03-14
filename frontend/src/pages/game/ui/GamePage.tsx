@@ -35,6 +35,21 @@ export function GamePage() {
   const selectedChoice = isAnswered
     ? currentScenario.choices.find(c => c.id === selectedChoiceId)
     : null
+  const isTripletVideoScenario = Boolean(
+    currentScenario.questionVideoUrl &&
+      currentScenario.wrongVideoUrl &&
+      currentScenario.correctVideoUrl,
+  )
+  const activeSceneVideoUrl = isTripletVideoScenario
+    ? isAnswered
+      ? answerState === 'correct'
+        ? currentScenario.correctVideoUrl
+        : currentScenario.wrongVideoUrl
+      : currentScenario.questionVideoUrl
+    : currentScenario.videoUrl
+  const shouldPauseScene = isTripletVideoScenario
+    ? choicesUnlocked && !isAnswered
+    : choicesUnlocked || isAnswered
   const isTimerLow = secondsLeft <= 5 && choicesUnlocked && !isAnswered
   const activeSeconds = choicesUnlocked ? secondsLeft : watchSecondsLeft
   const watchProgress =
@@ -188,9 +203,9 @@ export function GamePage() {
             >
               <SceneDisplay
                 scene={currentScenario.scene}
-                videoUrl={currentScenario.videoUrl}
+                videoUrl={activeSceneVideoUrl}
                 imageUrl={currentScenario.imageUrl}
-                shouldPause={choicesUnlocked || isAnswered}
+                shouldPause={shouldPauseScene}
               />
             </motion.div>
           </AnimatePresence>
@@ -225,7 +240,9 @@ export function GamePage() {
                   }}
                 >
                   {isAnswered
-                    ? '✅ Answered'
+                    ? isTripletVideoScenario
+                      ? '🎬 Result video'
+                      : '✅ Answered'
                     : choicesUnlocked
                     ? '🎯 Make your choice!'
                     : `👀 Watch — ${watchSecondsLeft}s`}
@@ -437,7 +454,39 @@ export function GamePage() {
             )}
 
             {/* Feedback */}
-            {isAnswered && selectedChoice && (
+            {isAnswered && isTripletVideoScenario && (
+              <Box
+                sx={{
+                  borderRadius: 4,
+                  p: { xs: 2.5, md: 3 },
+                  border: '2px solid rgba(15,23,42,0.12)',
+                  background: 'linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%)',
+                  boxShadow: '0 8px 24px rgba(30,64,175,0.14)',
+                }}
+              >
+                <Typography sx={{ fontWeight: 800, color: '#1e3a8a', mb: 0.6 }}>
+                  {answerState === 'correct' ? '✅ Correct choice' : '❌ Wrong choice'}
+                </Typography>
+                <Typography sx={{ color: '#475569', fontSize: '0.92rem', mb: 1.8 }}>
+                  The result video is now playing. Continue when you are ready.
+                </Typography>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  onClick={handleNext}
+                  sx={{
+                    bgcolor: answerState === 'correct' ? '#2563eb' : '#dc2626',
+                    '&:hover': { bgcolor: answerState === 'correct' ? '#1d4ed8' : '#b91c1c' },
+                    borderRadius: 99,
+                    fontWeight: 800,
+                  }}
+                >
+                  {isLastScenario || !!lastResult ? '🏆 See Results!' : 'Next ➡️'}
+                </Button>
+              </Box>
+            )}
+
+            {isAnswered && selectedChoice && !isTripletVideoScenario && (
               <FeedbackOverlay
                 isCorrect={answerState === 'correct'}
                 choice={selectedChoice}

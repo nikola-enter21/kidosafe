@@ -23,6 +23,12 @@ import {
 import type { Choice, Scenario } from '@/entities/scenario/model/types'
 import type { CategoryId } from '@/shared/types/game'
 
+type VideoField =
+  | 'videoUrl'
+  | 'questionVideoUrl'
+  | 'wrongVideoUrl'
+  | 'correctVideoUrl'
+
 function cloneDataset(dataset: ContentDataset): ContentDataset {
   return JSON.parse(JSON.stringify(dataset)) as ContentDataset
 }
@@ -117,6 +123,19 @@ export function EditorPage() {
     updateCategoryScenarios(selectedCategory, list =>
       list.map(item => (item.id === selectedScenario.id ? updater(item) : item)),
     )
+  }
+
+  const updateOptionalVideoField = (field: VideoField, rawValue: string) => {
+    updateSelectedScenario(item => {
+      const value = rawValue.trim()
+      if (value) {
+        return { ...item, [field]: value }
+      }
+
+      const next = { ...item } as Scenario & Record<string, unknown>
+      delete next[field]
+      return next as Scenario
+    })
   }
 
   const handleAddScenario = () => {
@@ -475,23 +494,53 @@ export function EditorPage() {
                 label="Video URL / Path"
                 placeholder="/videos/my-video.mp4 or https://..."
                 value={selectedScenario.videoUrl ?? ''}
-                onChange={event =>
-                  updateSelectedScenario(item => {
-                    const value = event.target.value.trim()
-                    if (!value) {
-                      const next = { ...item }
-                      delete next.videoUrl
-                      return next
-                    }
-                    return { ...item, videoUrl: value }
-                  })
-                }
+                onChange={event => updateOptionalVideoField('videoUrl', event.target.value)}
                 fullWidth
                 sx={{
                   '& .MuiInputBase-root': { color: '#fff', bgcolor: 'rgba(255,255,255,0.03)' },
                   '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.65)' },
                 }}
               />
+              <Typography sx={{ color: 'rgba(255,255,255,0.62)', fontSize: '0.78rem', mt: -1 }}>
+                Legacy single video flow (optional).
+              </Typography>
+
+              <TextField
+                label="Question video URL / Path (part_1)"
+                placeholder="/homealone/kontakt/new_style_part_1.mp4"
+                value={selectedScenario.questionVideoUrl ?? ''}
+                onChange={event => updateOptionalVideoField('questionVideoUrl', event.target.value)}
+                fullWidth
+                sx={{
+                  '& .MuiInputBase-root': { color: '#fff', bgcolor: 'rgba(255,255,255,0.03)' },
+                  '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.65)' },
+                }}
+              />
+              <TextField
+                label="Wrong answer video URL / Path (part_2)"
+                placeholder="/homealone/kontakt/new_style_part_2.mp4"
+                value={selectedScenario.wrongVideoUrl ?? ''}
+                onChange={event => updateOptionalVideoField('wrongVideoUrl', event.target.value)}
+                fullWidth
+                sx={{
+                  '& .MuiInputBase-root': { color: '#fff', bgcolor: 'rgba(255,255,255,0.03)' },
+                  '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.65)' },
+                }}
+              />
+              <TextField
+                label="Correct answer video URL / Path (part_3)"
+                placeholder="/homealone/kontakt/new_style_part_3.mp4"
+                value={selectedScenario.correctVideoUrl ?? ''}
+                onChange={event => updateOptionalVideoField('correctVideoUrl', event.target.value)}
+                fullWidth
+                sx={{
+                  '& .MuiInputBase-root': { color: '#fff', bgcolor: 'rgba(255,255,255,0.03)' },
+                  '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.65)' },
+                }}
+              />
+              <Typography sx={{ color: 'rgba(255,255,255,0.62)', fontSize: '0.78rem', mt: -1 }}>
+                Triplet video flow requires all 3 fields: question + wrong + correct.
+              </Typography>
 
               <Typography sx={{ fontWeight: 700, mt: 0.5 }}>
                 Answers (exactly 3, one correct)
