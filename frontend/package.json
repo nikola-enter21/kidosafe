@@ -10,8 +10,26 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@fontsource/manrope": "^5.2.6",
+    "@mui/icons-material": "^7.3.5",
+    "@mui/material": "^7.3.5",
+    "@types/canvas-confetti": "^1.9.0",
+    "@types/lodash": "^4.17.24",
+    "@types/react-router-dom": "^5.3.3",
+    "canvas-confetti": "^1.9.4",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.36.0",
+    "ky": "^1.14.3",
+    "lodash": "^4.17.23",
     "react": "^19.2.4",
-    "react-dom": "^19.2.4"
+    "react-dom": "^19.2.4",
+    "react-router-dom": "^7.13.1",
+    "swr": "^2.4.1",
+    "tailwind-merge": "^3.5.0",
+    "zustand": "^5.0.11"
   },
   "devDependencies": {
     "@babel/core": "^7.29.0",

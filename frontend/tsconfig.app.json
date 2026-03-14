@@ -5,6 +5,14 @@
     "useDefineForClassFields": true,
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "module": "ESNext",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@/app/*": ["src/app/*"],
+      "@/pages/*": ["src/pages/*"],
+      "@/shared/*": ["src/shared/*"],
+      "@/widgets/*": ["src/widgets/*"]
+    },
     "types": ["vite/client"],
     "skipLibCheck": true,
 
