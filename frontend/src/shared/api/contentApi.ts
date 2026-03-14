@@ -3,6 +3,7 @@
  * Base URL is controlled by VITE_API_BASE_URL (default: http://localhost:8000).
  */
 import { del, get, post, put } from '@/shared/api/http'
+import { ML_API_URL } from '@/shared/config/urls'
 import type { Scenario, Choice } from '@/entities/scenario/model/types'
 import type { CategoryId, Player } from '@/shared/types/game'
 
@@ -109,3 +110,11 @@ export interface RecordSessionPayload {
 /** POST /api/players/{id}/record-session/ */
 export const recordSession = (playerId: number, data: RecordSessionPayload) =>
   post<Player>(`/api/players/${playerId}/record-session/`, data)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ML Service
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** POST {ML_API_URL}/get_next_category – returns the recommended next category */
+export const getNextCategory = (ratio: Record<string, number>) =>
+  post<{ next_category: string }>(ML_API_URL + '/get_next_category', { ratio })

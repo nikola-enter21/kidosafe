@@ -18,6 +18,7 @@ export interface SceneConfig {
 export interface Scenario {
   id: string
   category: CategoryId
+  order: number
   scene: SceneConfig
   question: string
   watchTime: number

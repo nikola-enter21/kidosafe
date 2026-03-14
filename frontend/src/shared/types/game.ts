@@ -1,5 +1,7 @@
 export type Screen = 'home' | 'categories' | 'game' | 'result' | 'editor'
 
+export type GameMode = 'free' | 'smart'
+
 export interface PlayerCategoryStat {
   categoryId: CategoryId
   totalAnswers: number

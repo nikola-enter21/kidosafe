@@ -1,4 +1,4 @@
-import { Box, Button, LinearProgress, Stack, Typography } from '@mui/material'
+import { Box, Button, CircularProgress, LinearProgress, Stack, Typography } from '@mui/material'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useGameStore } from '@/entities/game/model/gameStore'
 import { useGameState } from '@/entities/game/hooks/useGameState'
@@ -8,7 +8,7 @@ import { ChoiceButton } from '@/widgets/choice-list/ChoiceButton'
 import { FeedbackOverlay } from '@/widgets/feedback-overlay/FeedbackOverlay'
 
 export function GamePage() {
-  const { selectedCategory, goHome, goToScreen } = useGameStore()
+  const { selectedCategory, goHome, goToScreen, gameMode, isLoadingNextScenario } = useGameStore()
   const {
     currentScenario,
     currentIndex,
@@ -26,12 +26,37 @@ export function GamePage() {
     lastResult,
   } = useGameState()
 
+  const isSmartMode = gameMode === 'smart'
+
+  // Loading screen between smart mode scenarios
+  if (isLoadingNextScenario) {
+    return (
+      <Box
+        sx={{
+          height: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 3,
+          bgcolor: '#0d1117',
+        }}
+      >
+        <CircularProgress size={56} sx={{ color: '#7c3aed' }} />
+        <Typography sx={{ color: 'rgba(255,255,255,0.7)', fontWeight: 700, fontSize: '1.15rem' }}>
+          🤖 Finding your next challenge…
+        </Typography>
+      </Box>
+    )
+  }
+
   if (!currentScenario || !selectedCategory) return null
 
   const cat = getCategoryById(selectedCategory)
-  const progress = (currentIndex / totalScenarios) * 100
+  const progress = isSmartMode ? 0 : (currentIndex / totalScenarios) * 100
   const isAnswered = answerState !== 'idle'
-  const isLastScenario = currentIndex === totalScenarios - 1
+  // In smart mode there's no "last" scenario — game ends only on death or exhaustion
+  const isLastScenario = isSmartMode ? !!lastResult : currentIndex === totalScenarios - 1
   const selectedChoice = isAnswered
     ? currentScenario.choices.find(c => c.id === selectedChoiceId)
     : null
@@ -137,17 +162,33 @@ export function GamePage() {
               }}
             />
           </Box>
-          <Typography
-            sx={{
-              color: 'rgba(255,255,255,0.4)',
-              fontSize: '0.75rem',
-              fontWeight: 700,
-              whiteSpace: 'nowrap',
-              flexShrink: 0,
-            }}
-          >
-            {currentIndex + 1} / {totalScenarios}
-          </Typography>
+          {isSmartMode ? (
+            <Typography
+              sx={{
+                color: '#a78bfa',
+                fontSize: '0.75rem',
+                fontWeight: 800,
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+              }}
+            >
+              🤖 Smart Mode
+            </Typography>
+          ) : (
+            <Typography
+              sx={{
+                color: 'rgba(255,255,255,0.4)',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+              }}
+            >
+              {currentIndex + 1} / {totalScenarios}
+            </Typography>
+          )}
         </Box>
 
         {/* Stats pills */}
@@ -351,7 +392,7 @@ export function GamePage() {
                 >
                   <Typography
                     sx={{
-                      color: cat.color,
+                      color: isSmartMode ? '#a78bfa' : cat.color,
                       fontSize: '0.68rem',
                       fontWeight: 900,
                       letterSpacing: '0.14em',
@@ -359,7 +400,9 @@ export function GamePage() {
                       mb: 1.25,
                     }}
                   >
-                    🤔 Question {currentIndex + 1} of {totalScenarios}
+                    {isSmartMode
+                      ? `🤖 ${cat.emoji} ${cat.label}`
+                      : `🤔 Question ${currentIndex + 1} of ${totalScenarios}`}
                   </Typography>
                   <Typography
                     sx={{
@@ -480,7 +523,9 @@ export function GamePage() {
                   {answerState === 'correct' ? '✅ Correct choice' : '❌ Wrong choice'}
                 </Typography>
                 <Typography sx={{ color: '#475569', fontSize: '0.92rem', mb: 1.8 }}>
-                  The result video is now playing. Continue when you are ready.
+                  {selectedChoice
+        ? `${selectedChoice.feedbackEmoji} ${selectedChoice.feedback}`
+        : 'The result video is now playing. Continue when you are ready.'}
                 </Typography>
                 <Button
                   fullWidth
