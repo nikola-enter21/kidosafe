@@ -65,6 +65,7 @@ function createScenarioTemplate(category: CategoryId, index: number): Scenario {
   return {
     id,
     category,
+    order: index,
     scene: {
       background: `linear-gradient(135deg, ${cat.colorLight} 0%, ${cat.color} 100%)`,
       emoji: cat.emoji,
@@ -75,6 +76,13 @@ function createScenarioTemplate(category: CategoryId, index: number): Scenario {
     tip: 'Talk to a trusted adult about the safest choice.',
     choices: [createChoice(0, true), createChoice(1, false), createChoice(2, false)],
   }
+}
+
+function renumberScenarios(list: Scenario[]): Scenario[] {
+  return list.map((scenario, index) => ({
+    ...scenario,
+    order: index,
+  }))
 }
 
 export function EditorPage() {
@@ -119,7 +127,7 @@ export function EditorPage() {
     setDataset(prev => {
       const next = cloneDataset(prev)
       const updatedList = updater(next.scenariosByCategory[categoryId] ?? [])
-      next.scenariosByCategory[categoryId] = updatedList
+      next.scenariosByCategory[categoryId] = renumberScenarios(updatedList)
       return next
     })
   }
@@ -375,7 +383,7 @@ export function EditorPage() {
           </Stack>
 
           <Stack spacing={1.1}>
-            {categoryScenarios.map((scenario, index) => {
+            {categoryScenarios.map((scenario) => {
               const isSelected = scenario.id === selectedScenarioId
               return (
                 <Paper
@@ -391,7 +399,7 @@ export function EditorPage() {
                   onClick={() => setSelectedScenarioId(scenario.id)}
                 >
                   <Typography sx={{ fontSize: '0.74rem', color: 'rgba(255,255,255,0.55)', mb: 0.4 }}>
-                    #{index + 1} · {scenario.id}
+                    #{scenario.order + 1} · {scenario.id}
                   </Typography>
                   <Typography sx={{ fontWeight: 700, fontSize: '0.88rem', lineHeight: 1.35 }}>
                     {scenario.question}

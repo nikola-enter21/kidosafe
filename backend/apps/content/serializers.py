@@ -100,7 +100,7 @@ class ScenarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Scenario
         fields = [
-            'id', 'category', 'question', 'watchTime', 'tip', 'description',
+            'id', 'category', 'order', 'question', 'watchTime', 'tip', 'description',
             'videoUrl',
             'questionVideoUrl', 'wrongVideoUrl', 'correctVideoUrl',
             'imageUrl', 'imageUrlCorrect', 'imageUrlWrong',
@@ -108,6 +108,7 @@ class ScenarioSerializer(serializers.ModelSerializer):
         ]
         extra_kwargs = {
             'id': {'required': False},
+            'order': {'required': False, 'default': 0},
         }
 
     # ── READ: inject scene object into output ─────────────────────────────
