@@ -201,6 +201,7 @@ export function GamePage() {
               transition={{ duration: 0.35 }}
               style={{ position: 'absolute', inset: 0 }}
             >
+
               <SceneDisplay
                 scene={currentScenario.scene}
                 videoUrl={activeSceneVideoUrl}

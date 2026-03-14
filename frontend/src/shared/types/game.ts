@@ -1,5 +1,18 @@
 export type Screen = 'home' | 'categories' | 'game' | 'result' | 'editor'
 
+export interface PlayerCategoryStat {
+  categoryId: CategoryId
+  totalAnswers: number
+  correctAnswers: number
+}
+
+export interface Player {
+  id: number
+  username: string
+  totalPoints: number
+  categoryStats: PlayerCategoryStat[]
+}
+
 export type CategoryId = 'home-alone' | 'stranger' | 'internet' | 'school'
 
 export interface AnswerRecord {
