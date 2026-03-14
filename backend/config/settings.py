@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     'django_filters',
     # Project
     'apps.content',
+    'apps.players',
 ]
 
 MIDDLEWARE = [
