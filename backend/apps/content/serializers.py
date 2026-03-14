@@ -145,8 +145,10 @@ class ScenarioSerializer(serializers.ModelSerializer):
         choices_data = validated_data.pop('choices', [])
         scenario = Scenario.objects.create(**validated_data)
         for idx, choice_data in enumerate(choices_data):
-            choice_data.setdefault('order', idx)
-            Choice.objects.create(scenario=scenario, **choice_data)
+            cd = dict(choice_data)
+            cd.pop('id', None)
+            cd.setdefault('order', idx)
+            Choice.objects.create(scenario=scenario, **cd)
         return scenario
 
     # ── UPDATE ────────────────────────────────────────────────────────────
@@ -162,8 +164,10 @@ class ScenarioSerializer(serializers.ModelSerializer):
         if choices_data is not None:
             instance.choices.all().delete()
             for idx, choice_data in enumerate(choices_data):
-                choice_data.setdefault('order', idx)
-                Choice.objects.create(scenario=instance, **choice_data)
+                cd = dict(choice_data)
+                cd.pop('id', None)
+                cd.setdefault('order', idx)
+                Choice.objects.create(scenario=instance, **cd)
 
         return instance
 

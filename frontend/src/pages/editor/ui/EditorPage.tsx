@@ -164,6 +164,19 @@ export function EditorPage() {
     })
   }
 
+  const updateChoiceField = (
+    index: number,
+    field: keyof Pick<Choice, 'text' | 'feedback' | 'feedbackEmoji'>,
+    value: string,
+  ) => {
+    updateSelectedScenario(item => ({
+      ...item,
+      choices: item.choices.map((entry, i) =>
+        i === index ? { ...entry, [field]: value } : entry,
+      ),
+    }))
+  }
+
   const handleAddScenario = () => {
     setError(null)
     setMessage(null)
@@ -629,48 +642,87 @@ export function EditorPage() {
               </Typography>
 
               <Typography sx={{ fontWeight: 700, mt: 0.5 }}>
-                Answers (exactly 3, one correct)
+                Answers <Typography component="span" sx={{ fontWeight: 400, fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>(select radio = correct answer)</Typography>
               </Typography>
 
-              <Stack spacing={1.15}>
+              <Stack spacing={2}>
                 {selectedScenario.choices.map((choice, index) => (
-                  <Stack key={choice.id} direction="row" spacing={1} alignItems="center">
-                    <Radio
-                      checked={choice.isCorrect}
-                      onChange={() =>
-                        updateSelectedScenario(item => ({
-                          ...item,
-                          choices: item.choices.map((entry, choiceIndex) => ({
-                            ...entry,
-                            isCorrect: choiceIndex === index,
-                          })),
-                        }))
-                      }
-                      sx={{ color: '#fff' }}
-                    />
-                    <TextField
-                      label={`Answer ${index + 1}`}
-                      value={choice.text}
-                      onChange={event =>
-                        updateSelectedScenario(item => ({
-                          ...item,
-                          choices: item.choices.map((entry, choiceIndex) =>
-                            choiceIndex === index
-                              ? { ...entry, text: event.target.value }
-                              : entry,
-                          ),
-                        }))
-                      }
-                      fullWidth
-                      sx={{
-                        '& .MuiInputBase-root': {
-                          color: '#fff',
-                          bgcolor: 'rgba(255,255,255,0.03)',
-                        },
-                        '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.65)' },
-                      }}
-                    />
-                  </Stack>
+                  <Box
+                    key={choice.id}
+                    sx={{
+                      bgcolor: choice.isCorrect
+                        ? 'rgba(16,185,129,0.07)'
+                        : 'rgba(255,255,255,0.03)',
+                      border: `1px solid ${choice.isCorrect ? 'rgba(16,185,129,0.3)' : 'rgba(255,255,255,0.08)'}`,
+                      borderRadius: 2,
+                      p: 1.5,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 1,
+                    }}
+                  >
+                    {/* Row 1: Radio + Answer text + Feedback emoji */}
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Radio
+                        checked={choice.isCorrect}
+                        onChange={() =>
+                          updateSelectedScenario(item => ({
+                            ...item,
+                            choices: item.choices.map((entry, choiceIndex) => ({
+                              ...entry,
+                              isCorrect: choiceIndex === index,
+                            })),
+                          }))
+                        }
+                        sx={{ color: choice.isCorrect ? '#10b981' : 'rgba(255,255,255,0.5)', p: 0.5 }}
+                      />
+                      <TextField
+                        label={`Answer ${index + 1}`}
+                        value={choice.text}
+                        onChange={event => updateChoiceField(index, 'text', event.target.value)}
+                        fullWidth
+                        sx={{
+                          '& .MuiInputBase-root': { color: '#fff', bgcolor: 'rgba(255,255,255,0.03)' },
+                          '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.65)' },
+                        }}
+                      />
+                      <TextField
+                        label="Emoji"
+                        value={choice.feedbackEmoji}
+                        onChange={event => updateChoiceField(index, 'feedbackEmoji', event.target.value)}
+                        sx={{
+                          width: 86,
+                          flexShrink: 0,
+                          '& .MuiInputBase-root': { color: '#fff', bgcolor: 'rgba(255,255,255,0.03)', fontSize: '1.2rem' },
+                          '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.65)' },
+                        }}
+                        inputProps={{ maxLength: 4 }}
+                      />
+                    </Stack>
+
+                    {/* Row 2: Feedback message */}
+                    <Box sx={{ pl: '44px' }}>
+                      <TextField
+                        label={`Feedback — ${choice.isCorrect ? 'Correct ✅' : 'Wrong ❌'}`}
+                        multiline
+                        minRows={2}
+                        value={choice.feedback}
+                        onChange={event => updateChoiceField(index, 'feedback', event.target.value)}
+                        fullWidth
+                        placeholder={
+                          choice.isCorrect
+                            ? 'Great choice! That is the safest option.'
+                            : 'Not the safest option. Think about what could happen.'
+                        }
+                        sx={{
+                          '& .MuiInputBase-root': { color: '#fff', bgcolor: 'rgba(255,255,255,0.03)' },
+                          '& .MuiInputLabel-root': {
+                            color: choice.isCorrect ? 'rgba(52,211,153,0.85)' : 'rgba(252,165,165,0.85)',
+                          },
+                        }}
+                      />
+                    </Box>
+                  </Box>
                 ))}
               </Stack>
             </Stack>
