@@ -119,7 +119,7 @@ export function HomePage() {
                 mb: 1.5,
               }}
             >
-              KidoSafe
+              KiddoSafe
             </Typography>
             <Typography
               sx={{

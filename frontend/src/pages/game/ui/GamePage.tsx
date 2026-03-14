@@ -70,7 +70,7 @@ export function GamePage() {
           <Typography
             sx={{ color: '#fff', fontWeight: 900, fontSize: '1.1rem', letterSpacing: '-0.01em' }}
           >
-            KidoSafe
+            KiddoSafe
           </Typography>
         </Box>
 
