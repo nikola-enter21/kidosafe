@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-import { getScenariosByCategory } from '@/entities/scenario/model/scenarios'
+import { getCategoryScenarios } from '@/shared/api/contentApi'
 import type { AnswerRecord, CategoryId, GameResult, Screen } from '@/shared/types/game'
 import type { Scenario } from '@/entities/scenario/model/types'
 
@@ -18,9 +18,10 @@ interface GameStore {
   streak: number
   answers: AnswerRecord[]
   lastResult: GameResult | null
+  isLoadingScenarios: boolean
 
   goToScreen: (screen: Screen) => void
-  selectCategory: (id: CategoryId) => void
+  selectCategory: (id: CategoryId) => Promise<void>
   submitAnswer: (choiceId: string, isCorrect: boolean, timeMs: number) => void
   nextScenario: () => void
   restartCategory: () => void
@@ -44,23 +45,33 @@ export const useGameStore = create<GameStore>((set, get) => ({
   streak: 0,
   answers: [],
   lastResult: null,
+  isLoadingScenarios: false,
 
   goToScreen: (screen) => set({ screen }),
 
-  selectCategory: (id) => {
-    const scenarios = getScenariosByCategory(id)
-    if (scenarios.length === 0) return
-    set({
-      selectedCategory: id,
-      scenarios,
-      currentIndex: 0,
-      lives: MAX_LIVES,
-      score: 0,
-      streak: 0,
-      answers: [],
-      lastResult: null,
-      screen: 'game',
-    })
+  selectCategory: async (id) => {
+    set({ isLoadingScenarios: true })
+    try {
+      const scenarios = await getCategoryScenarios(id)
+      if (scenarios.length === 0) {
+        set({ isLoadingScenarios: false })
+        return
+      }
+      set({
+        selectedCategory: id,
+        scenarios,
+        currentIndex: 0,
+        lives: MAX_LIVES,
+        score: 0,
+        streak: 0,
+        answers: [],
+        lastResult: null,
+        screen: 'game',
+        isLoadingScenarios: false,
+      })
+    } catch {
+      set({ isLoadingScenarios: false })
+    }
   },
 
   submitAnswer: (choiceId, isCorrect, timeMs) => {
@@ -110,7 +121,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   restartCategory: () => {
     const { selectedCategory } = get()
-    if (selectedCategory) get().selectCategory(selectedCategory)
+    if (selectedCategory) void get().selectCategory(selectedCategory)
   },
 
   goHome: () =>

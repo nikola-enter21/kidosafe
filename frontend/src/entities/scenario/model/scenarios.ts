@@ -6,10 +6,10 @@ import {
 } from '@/entities/scenario/model/contentRepository'
 import type { Scenario } from './types'
 
-export function getScenariosByCategory(category: CategoryId): Scenario[] {
+export async function getScenariosByCategory(category: CategoryId): Promise<Scenario[]> {
   return getScenariosByCategoryFromRepository(category)
 }
 
-export function getScenarioById(id: string): Scenario | undefined {
+export async function getScenarioById(id: string): Promise<Scenario | undefined> {
   return getScenarioByIdFromRepository(id)
 }
