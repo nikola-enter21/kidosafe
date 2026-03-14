@@ -78,6 +78,33 @@ class Scenario(models.Model):
         help_text='Video shown after a correct choice (.mp4/.webm path or URL)',
     )
 
+    # Image fields (shown when no video is available for the given state)
+    image_url = models.CharField(
+        max_length=500,
+        blank=True,
+        default='',
+        help_text='Image shown during question phase (fallback when no question_video_url)',
+    )
+    image_url_correct = models.CharField(
+        max_length=500,
+        blank=True,
+        default='',
+        help_text='Image shown after a correct choice (fallback when no correct_video_url)',
+    )
+    image_url_wrong = models.CharField(
+        max_length=500,
+        blank=True,
+        default='',
+        help_text='Image shown after a wrong choice (fallback when no wrong_video_url)',
+    )
+
+    # Description (plain-text summary of the scenario / media — for future AI matching)
+    description = models.TextField(
+        blank=True,
+        default='',
+        help_text='Short description of the scenario media (used for AI matching)',
+    )
+
     # SceneConfig (embedded)
     scene_background = models.CharField(
         max_length=200,

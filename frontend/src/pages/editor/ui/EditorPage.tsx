@@ -335,30 +335,6 @@ export function EditorPage() {
           <Button startIcon={<SaveRounded />} variant="contained" onClick={handleSave}>
             Save
           </Button>
-          <Button
-            startIcon={<UploadRounded />}
-            variant="outlined"
-            onClick={handleImportClick}
-            sx={{ color: '#fff', borderColor: 'rgba(255,255,255,0.4)' }}
-          >
-            Import JSON
-          </Button>
-          <Button
-            startIcon={<DownloadRounded />}
-            variant="outlined"
-            onClick={handleExport}
-            sx={{ color: '#fff', borderColor: 'rgba(255,255,255,0.4)' }}
-          >
-            Export JSON
-          </Button>
-          <Button
-            startIcon={<RestartAltRounded />}
-            variant="outlined"
-            onClick={handleReset}
-            sx={{ color: '#fff', borderColor: 'rgba(255,255,255,0.4)' }}
-          >
-            Reload
-          </Button>
         </Stack>
       </Box>
 

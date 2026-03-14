@@ -35,19 +35,30 @@ export function GamePage() {
   const selectedChoice = isAnswered
     ? currentScenario.choices.find(c => c.id === selectedChoiceId)
     : null
-  const isTripletVideoScenario = Boolean(
-    currentScenario.questionVideoUrl &&
-      currentScenario.wrongVideoUrl &&
-      currentScenario.correctVideoUrl,
+  // Triplet = scenario has distinct question + correct + wrong media (video OR image)
+  const isTriplet = Boolean(
+    (currentScenario.questionVideoUrl || currentScenario.imageUrl) &&
+    (currentScenario.correctVideoUrl  || currentScenario.imageUrlCorrect) &&
+    (currentScenario.wrongVideoUrl    || currentScenario.imageUrlWrong),
   )
-  const activeSceneVideoUrl = isTripletVideoScenario
+  // Active video for the current state
+  const activeSceneVideoUrl = isTriplet
     ? isAnswered
       ? answerState === 'correct'
         ? currentScenario.correctVideoUrl
         : currentScenario.wrongVideoUrl
       : currentScenario.questionVideoUrl
     : currentScenario.videoUrl
-  const shouldPauseScene = isTripletVideoScenario
+  // Active image fallback for the current state (used when no video)
+  const activeSceneImageUrl = isTriplet
+    ? isAnswered
+      ? answerState === 'correct'
+        ? currentScenario.imageUrlCorrect
+        : currentScenario.imageUrlWrong
+      : currentScenario.imageUrl
+    : currentScenario.imageUrl
+  // Pause only while choices are shown but not yet answered; result media should auto-play
+  const shouldPauseScene = isTriplet
     ? choicesUnlocked && !isAnswered
     : choicesUnlocked || isAnswered
   const isTimerLow = secondsLeft <= 5 && choicesUnlocked && !isAnswered
@@ -205,7 +216,7 @@ export function GamePage() {
               <SceneDisplay
                 scene={currentScenario.scene}
                 videoUrl={activeSceneVideoUrl}
-                imageUrl={currentScenario.imageUrl}
+                imageUrl={activeSceneImageUrl}
                 shouldPause={shouldPauseScene}
               />
             </motion.div>
@@ -241,7 +252,7 @@ export function GamePage() {
                   }}
                 >
                   {isAnswered
-                    ? isTripletVideoScenario
+                    ? isTriplet
                       ? '🎬 Result video'
                       : '✅ Answered'
                     : choicesUnlocked
@@ -455,7 +466,7 @@ export function GamePage() {
             )}
 
             {/* Feedback */}
-            {isAnswered && isTripletVideoScenario && (
+            {isAnswered && isTriplet && (
               <Box
                 sx={{
                   borderRadius: 4,
@@ -487,7 +498,7 @@ export function GamePage() {
               </Box>
             )}
 
-            {isAnswered && selectedChoice && !isTripletVideoScenario && (
+            {isAnswered && selectedChoice && !isTriplet && (
               <FeedbackOverlay
                 isCorrect={answerState === 'correct'}
                 choice={selectedChoice}

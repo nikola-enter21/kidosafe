@@ -71,6 +71,15 @@ class ScenarioSerializer(serializers.ModelSerializer):
     correctVideoUrl = serializers.CharField(
         source='correct_video_url', required=False, allow_blank=True, default=''
     )
+    imageUrl = serializers.CharField(
+        source='image_url', required=False, allow_blank=True, default=''
+    )
+    imageUrlCorrect = serializers.CharField(
+        source='image_url_correct', required=False, allow_blank=True, default=''
+    )
+    imageUrlWrong = serializers.CharField(
+        source='image_url_wrong', required=False, allow_blank=True, default=''
+    )
     # Legacy alias from older editor payloads; mapped to question_video_url in to_internal_value.
     videoUrl = serializers.CharField(required=False, allow_blank=True, write_only=True, default='')
     choices = ChoiceSerializer(many=True, required=False)
@@ -78,9 +87,10 @@ class ScenarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Scenario
         fields = [
-            'id', 'category', 'question', 'watchTime', 'tip',
+            'id', 'category', 'question', 'watchTime', 'tip', 'description',
             'videoUrl',
             'questionVideoUrl', 'wrongVideoUrl', 'correctVideoUrl',
+            'imageUrl', 'imageUrlCorrect', 'imageUrlWrong',
             'choices',
         ]
         extra_kwargs = {
@@ -168,13 +178,17 @@ class ScenarioListSerializer(serializers.ModelSerializer):
     questionVideoUrl = serializers.CharField(source='question_video_url', allow_blank=True)
     wrongVideoUrl = serializers.CharField(source='wrong_video_url', allow_blank=True)
     correctVideoUrl = serializers.CharField(source='correct_video_url', allow_blank=True)
+    imageUrl = serializers.CharField(source='image_url', allow_blank=True)
+    imageUrlCorrect = serializers.CharField(source='image_url_correct', allow_blank=True)
+    imageUrlWrong = serializers.CharField(source='image_url_wrong', allow_blank=True)
     choiceCount = serializers.SerializerMethodField()
 
     class Meta:
         model = Scenario
         fields = [
-            'id', 'category', 'question', 'watchTime', 'tip',
+            'id', 'category', 'question', 'watchTime', 'tip', 'description',
             'questionVideoUrl', 'wrongVideoUrl', 'correctVideoUrl',
+            'imageUrl', 'imageUrlCorrect', 'imageUrlWrong',
             'choiceCount', 'order',
         ]
 
