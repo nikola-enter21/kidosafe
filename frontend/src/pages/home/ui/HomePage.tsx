@@ -14,6 +14,7 @@ export function HomePage() {
   const isSettingPlayer = useGameStore(s => s.isSettingPlayer)
   const setPlayer = useGameStore(s => s.setPlayer)
   const clearPlayer = useGameStore(s => s.clearPlayer)
+  const startSmartMode = useGameStore(s => s.startSmartMode)
 
   const { data: apiCategories } = useFetch<ApiCategory[]>('/api/categories/')
   const totalChallenges = apiCategories?.reduce((sum, c) => sum + c.scenarioCount, 0) ?? 0
@@ -296,6 +297,30 @@ export function HomePage() {
                       }}
                     >
                       🚀 Let's Play!
+                    </Button>
+                    <Button
+                      fullWidth
+                      size="large"
+                      onClick={startSmartMode}
+                      sx={{
+                        background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+                        color: '#fff',
+                        fontWeight: 900,
+                        fontSize: { xs: '1.1rem', md: '1.25rem' },
+                        py: { xs: 1.75, md: 2 },
+                        borderRadius: 99,
+                        boxShadow: '0 8px 28px rgba(79,70,229,0.45)',
+                        border: '1.5px solid rgba(255,255,255,0.2)',
+                        letterSpacing: '0.01em',
+                        '&:hover': {
+                          background: 'linear-gradient(135deg, #4338ca 0%, #6d28d9 100%)',
+                          transform: 'translateY(-3px)',
+                          boxShadow: '0 14px 36px rgba(79,70,229,0.55)',
+                        },
+                        transition: 'all 0.22s ease',
+                      }}
+                    >
+                      🤖 Smart Mode
                     </Button>
                     <Button
                       fullWidth
