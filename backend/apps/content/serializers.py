@@ -190,6 +190,31 @@ class ScenarioSerializer(serializers.ModelSerializer):
 # Scenario list (lightweight, no nested choices)
 # ─────────────────────────────────────────────────────────────────────────────
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Material input (generate_scenario endpoint)
+# ─────────────────────────────────────────────────────────────────────────────
+
+class MaterialInputSerializer(serializers.Serializer):
+    """
+    Validates the JSON payload received from the AI scenario service.
+    Used by GET /api/categories/{id}/generate_scenario/.
+    """
+    id_material           = serializers.CharField(required=False, allow_null=True, allow_blank=True, default=None)
+    question              = serializers.CharField()
+    answers               = serializers.ListField(child=serializers.CharField(), min_length=2)
+    correctAnswer         = serializers.IntegerField(min_value=0)
+    question_image_prompt = serializers.CharField(required=False, allow_blank=True, default='')
+    success_image_prompt  = serializers.CharField(required=False, allow_blank=True, default='')
+    failure_image_prompt  = serializers.CharField(required=False, allow_blank=True, default='')
+
+    def validate(self, data):
+        if data['correctAnswer'] >= len(data['answers']):
+            raise serializers.ValidationError(
+                {'correctAnswer': 'Index out of range for the provided answers array.'}
+            )
+        return data
+
+
 class ScenarioListSerializer(serializers.ModelSerializer):
     """Compact serializer used in list views to avoid N+1 on choices."""
     watchTime = serializers.IntegerField(source='watch_time')
