@@ -1,5 +1,6 @@
 import json
 import requests
+<<<<<<< Updated upstream
 from prompts import *
 from env import *
 =======
@@ -252,6 +253,90 @@ def generate_safety_quiz_continuation(
 #     print(f"Step 1 — Generating opening quiz for topic: '{topic}'\n")
 #     opening = generate_safety_quiz(topic)
 #     print(json.dumps(opening, indent=2))
+=======
+def generate_image_prompts(
+    situation: str,
+    context: str,
+    answers: list,
+    correct_answer: int,
+) -> dict:
+    """
+    Generates image prompts for visual illustrations of a quiz scenario.
+
+    Args:
+        situation:      The scenario text the child is currently facing.
+        context:        The accumulated story context for visual consistency.
+        answers:        List of answer choice strings.
+        correct_answer: Index of the correct answer in the answers list (0-based).
+
+    Returns:
+        A dict with keys: question_image_prompt, success_image_prompt, failure_image_prompt.
+
+    Raises:
+        requests.HTTPError: If the API request fails.
+        ValueError: If the response cannot be parsed as valid JSON or is missing fields.
+    """
+    prompt = IMAGE_PROMPT_TEMPLATE.format(
+        situation=situation,
+        context=context,
+        answers=answers,
+        correct_answer=correct_answer,
+    )
+
+    payload = {
+        "model": MODEL_ID,
+        "input": prompt,
+        "temperature": 0.7,
+        "stream": False,
+    }
+
+    response = requests.post(
+        f"{LM_STUDIO_BASE_URL}/api/v1/chat",
+        headers={"Content-Type": "application/json"},
+        json=payload,
+        timeout=60,
+    )
+    response.raise_for_status()
+
+    data = response.json()
+
+    output_items = data.get("output", [])
+    raw_text = ""
+    for item in output_items:
+        if item.get("type") == "message":
+            raw_text = item.get("content", "")
+            break
+
+    if not raw_text:
+        raise ValueError(f"No message content found in API response: {data}")
+
+    raw_text = raw_text.strip()
+    if raw_text.startswith("```"):
+        raw_text = raw_text.split("\n", 1)[-1]
+        raw_text = raw_text.rsplit("```", 1)[0]
+    raw_text = raw_text.strip()
+
+    try:
+        image_prompts = json.loads(raw_text)
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Failed to parse model output as JSON: {e}\nRaw output:\n{raw_text}")
+
+    expected_fields = {"question_image_prompt", "success_image_prompt", "failure_image_prompt"}
+    missing = expected_fields - image_prompts.keys()
+    if missing:
+        raise ValueError(f"Response JSON is missing fields: {missing}\nParsed: {image_prompts}")
+
+    return image_prompts
+
+
+if __name__ == "__main__":
+    topic = "Online interactions"
+
+    # Step 1: generate the opening scenario
+    print(f"Step 1 — Generating opening quiz for topic: '{topic}'\n")
+    opening = generate_safety_quiz(topic)
+    print(json.dumps(opening, indent=2, ensure_ascii=False))
+>>>>>>> Stashed changes
 
 #     # Step 2: use the correct answer to continue the story
 #     correct_answer = opening["answers"][opening["correct_answer"]]
@@ -264,5 +349,22 @@ def generate_safety_quiz_continuation(
 #         context=opening["context"],
 #     )
 #     print(json.dumps(continuation, indent=2))
+=======
+    continuation = generate_safety_quiz_continuation(
+        topic=topic,
+        situation=opening["scenario"],
+        response=correct_answer,
+        context=opening["context"],
+    )
+    print(json.dumps(continuation, indent=2, ensure_ascii=False))
+>>>>>>> Stashed changes
 
-    
+    # Step 3: generate image prompts for the continuation scenario
+    print(f"\nStep 3 — Generating image prompts\n")
+    image_prompts = generate_image_prompts(
+        situation=continuation["scenario"],
+        context=continuation["context"],
+        answers=continuation["answers"],
+        correct_answer=continuation["correct_answer"],
+    )
+    print(json.dumps(image_prompts, indent=2, ensure_ascii=False))
