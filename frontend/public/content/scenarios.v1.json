@@ -75,7 +75,7 @@
           {
             "id": "ha-otrova-b",
             "text": "You take a sip to check if it is juice.",
-            "emoji": "🫳",
+            "emoji": "",
             "isCorrect": false,
             "feedback": "That is very dangerous. Cleaners can be poisonous.",
             "feedbackEmoji": "❌"
@@ -83,7 +83,7 @@
           {
             "id": "ha-otrova-c",
             "text": "You smell it closely to figure out what it is.",
-            "emoji": "👃",
+            "emoji": "",
             "isCorrect": false,
             "feedback": "That is unsafe. Fumes from cleaners can also be harmful.",
             "feedbackEmoji": "⚠️"
@@ -97,7 +97,7 @@
         "category": "stranger",
         "scene": {
           "background": "linear-gradient(135deg, #f7971e 0%, #ffd200 100%)",
-          "emoji": "🍬",
+          "emoji": "",
           "label": "Stranger with candy"
         },
         "question": "A stranger is holding out candy and wants you to come closer. What do you do?",
@@ -108,7 +108,7 @@
           {
             "id": "st-1-a",
             "text": "Shout \"NO!\", step back and run to a trusted adult",
-            "emoji": "🏃",
+            "emoji": "",
             "isCorrect": true,
             "feedback": "Perfect! Shout NO loudly, get away fast, and always tell a trusted adult what happened!",
             "feedbackEmoji": "🌟"
@@ -116,7 +116,7 @@
           {
             "id": "st-1-b",
             "text": "Take the candy — it looks yummy!",
-            "emoji": "🍬",
+            "emoji": "",
             "isCorrect": false,
             "feedback": "Never accept food or gifts from someone you don't know. It could be dangerous!",
             "feedbackEmoji": "❌"
@@ -124,7 +124,7 @@
           {
             "id": "st-1-c",
             "text": "Stay and talk to them nicely",
-            "emoji": "💬",
+            "emoji": "",
             "isCorrect": false,
             "feedback": "Don't stop to talk — strangers can seem friendly but still be dangerous. Leave immediately!",
             "feedbackEmoji": "❌"

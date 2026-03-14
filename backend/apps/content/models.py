@@ -59,21 +59,23 @@ class Scenario(models.Model):
         default=4, help_text='Seconds to watch before choices unlock (2–15)'
     )
     tip = models.TextField(help_text='Safety advice shown after answering')
-    video_url = models.CharField(max_length=500, blank=True, default='', help_text='Direct .mp4/.webm path or URL')
-    image_url = models.CharField(max_length=500, blank=True, default='', help_text='Fallback image path or URL')
-
-    # Follow-up media shown in the feedback overlay after the child answers
-    follow_up_video_url = models.CharField(
-        max_length=500, blank=True, default='',
-        help_text='Short follow-up video shown after the answer (.mp4/.webm path or URL)',
+    question_video_url = models.CharField(
+        max_length=500,
+        blank=True,
+        default='',
+        help_text='Video shown before choices are made (.mp4/.webm path or URL)',
     )
-    follow_up_image_url = models.CharField(
-        max_length=500, blank=True, default='',
-        help_text='Follow-up image shown when no follow-up video is set',
+    wrong_video_url = models.CharField(
+        max_length=500,
+        blank=True,
+        default='',
+        help_text='Video shown after an incorrect choice (.mp4/.webm path or URL)',
     )
-    follow_up_caption = models.CharField(
-        max_length=300, blank=True, default='',
-        help_text='Short caption shown below the follow-up media',
+    correct_video_url = models.CharField(
+        max_length=500,
+        blank=True,
+        default='',
+        help_text='Video shown after a correct choice (.mp4/.webm path or URL)',
     )
 
     # SceneConfig (embedded)

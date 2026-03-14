@@ -392,10 +392,21 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.ERROR(f'  Category "{cat_id}" not found — skipping'))
                 continue
 
-            sc_id = sc_data.pop('id')
+            sc_payload = dict(sc_data)
+            sc_id = sc_payload.pop('id')
+
+            # Support legacy seed entries that still use video_url/image_url.
+            legacy_video_url = sc_payload.pop('video_url', '')
+            sc_payload.pop('image_url', None)
+            if legacy_video_url and not sc_payload.get('question_video_url'):
+                sc_payload['question_video_url'] = legacy_video_url
+            sc_payload.setdefault('question_video_url', '')
+            sc_payload.setdefault('wrong_video_url', '')
+            sc_payload.setdefault('correct_video_url', '')
+
             scenario, created = Scenario.objects.update_or_create(
                 id=sc_id,
-                defaults={**sc_data, 'category': category},
+                defaults={**sc_payload, 'category': category},
             )
             status = '✅ created' if created else '🔄 updated'
             self.stdout.write(f'  [{cat_id}] {sc_id} — {status}')
