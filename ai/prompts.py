@@ -21,7 +21,7 @@ Context:
 Topic: {topic}
 
 Output Constraints:
-- Format: One single paragraph only.
+- Format: One single paragraph only. Do not tell me you've understood and are going to do the task. Do not offer additional tips for formulating a quiz. Generate the paragraph on safety behaviors and absolutely nothing else.
 - Style: Clear, educational, rule-based, and child-friendly.
 - Tone: Calm, supportive, and instructive.
 - Scope: Only factual safety rules and guidance; no stories or dialogue.
@@ -37,7 +37,7 @@ Task: Create a child safety scenario quiz in JSON format.
 Requirements:
 1) Generate a scenario that is realistic and suitable for children aged 5-10.
 2) Formulate a clear, actionable question prompting the child to choose the safest course of action.
-3) Provide 2-3 plausible answer choices, with one being clearly correct.
+3) Provide 2-3 plausible answer choices, with one being clearly correct. Paired with each answer, provide a short piece of feedback for picking this particular answer.
 4) Specify the index of the correct answer (starting from 0).
 5) Include a verbatim copy of the scenario in a separate field labeled "context".
 Context:
@@ -45,7 +45,7 @@ Context:
 The quiz topic is appended at the end of this prompt. Ensure the scenario matches this topic while remaining age-appropriate and sensitive. Keep text brief and accessible, as visuals will aid comprehension. The JSON output should strictly contain the following fields: {{scenario}}, {{question}}, {{answers}}, {{correct_answer}}, {{context}}. THE CONTEXT FIELD OF THE JSON SHOULD HAVE THE EXACT SAME CONTENTS AS THE SCENARIO FIELD.
 ///
 Constraints:
-- Format: JSON with exactly 5 fields as specified above. Do NOT output anything besides the finished JSON.
+- Format: JSON with exactly 5 fields as specified above. The answers field should be a list of objects, each objected containing the text of the answer and the text of the feedback. Do NOT output anything besides the finished JSON.
 - Style: concise, clear, child-friendly, educational.
 - Scope: Focus only on realistic safety situations for children 5-10; exclude violent or inappropriate content.
 - Reasoning: Think step-by-step to ensure each component logically flows from the scenario to the question and answers.
