@@ -45,7 +45,7 @@ Context:
 The quiz topic is appended at the end of this prompt. Ensure the scenario matches this topic while remaining age-appropriate and sensitive. Keep text brief and accessible, as visuals will aid comprehension. The JSON output should strictly contain the following fields: {{scenario}}, {{question}}, {{answers}}, {{correct_answer}}, {{context}}. THE CONTEXT FIELD OF THE JSON SHOULD HAVE THE EXACT SAME CONTENTS AS THE SCENARIO FIELD.
 ///
 Constraints:
-- Format: JSON with exactly 5 fields as specified above. The answers field should be a list of objects, each objected containing the text of the answer and the text of the feedback. Do NOT output anything besides the finished JSON.
+- Format: JSON with exactly 5 fields as specified above. The "answers" field must be a list of objects, where each object has a "text" field for the answer and a "feedback" field for the explanation. Do NOT output anything besides the finished JSON.
 - Style: concise, clear, child-friendly, educational.
 - Scope: Focus only on realistic safety situations for children 5-10; exclude violent or inappropriate content.
 - Reasoning: Think step-by-step to ensure each component logically flows from the scenario to the question and answers.
@@ -71,7 +71,7 @@ You will be provided:
 The quiz topic is appended at the end of the prompt. Use the context to maintain consistency, avoid plot holes, and adapt consequences of incorrect choices.
 ///
 Constraints:
-- Format: JSON with exactly 5 fields: {{scenario}}, {{question}}, {{answers}}, {{correct_answer}}, {{context}}. Do NOT output anything besides the finished JSON.
+- Format: JSON with exactly 5 fields: {{scenario}}, {{question}}, {{answers}}, {{correct_answer}}, {{context}}. The "answers" field must be a list of objects, where each object has a "text" field for the answer and a "feedback" field for the explanation. Do NOT output anything besides the finished JSON.
 - Style: concise, clear, child-friendly, educational.
 - Scope: Focus on realistic child safety situations for ages 5-10; exclude violence or inappropriate content.
 - Reasoning: Think step-by-step, ensuring the continuation flows naturally from the previous response and context.

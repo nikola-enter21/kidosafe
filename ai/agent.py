@@ -5,10 +5,14 @@ from env import *
 from pydantic import BaseModel, ValidationError, Field
 from typing import List
 
+class QuizAnswer(BaseModel):
+    text: str
+    feedback: str
+
 class SafetyQuiz(BaseModel):
     scenario: str
     question: str
-    answers: List[str]
+    answers: List[QuizAnswer]
     correct_answer: int
     context: str
 
@@ -257,7 +261,7 @@ def generate_image_prompts(
     Args:
         situation:      The scenario text the child is currently facing.
         context:        The accumulated story context for visual consistency.
-        answers:        List of answer choice strings.
+        answers:        List of answer choice objects (with text and feedback).
         correct_answer: Index of the correct answer in the answers list (0-based).
 
     Returns:
