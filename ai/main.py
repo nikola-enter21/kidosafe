@@ -23,7 +23,8 @@ def read_root():
 
 @app.post("/api/categories/{category}/generate_scenario")
 def generate_scenario(category: str):
-    generated_quiz = generate_safety_quiz(category)
+    expand_category = expand_topic(category)
+    generated_quiz = generate_safety_quiz(category + ": " + expand_category)
 
     rel_doc = get_most_relevant_materials(generated_quiz.get("scenario"), top_k=1)
 

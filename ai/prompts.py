@@ -1,3 +1,36 @@
+PROMPT_TOPIC_EXPENSION_TEMPLATE = """Act like an expert educational content designer specializing in child safety education for children ages 5–10. 
+You are experienced in transforming safety guidelines into simple, rule-based educational content that can easily be converted into quiz questions for young learners.
+Your goal is to convert a safety topic into a dense, clear, rule-focused paragraph that highlights essential safety behaviors. 
+The final text must provide enough structured information so that an educator or curriculum designer can easily extract 3–5 quiz questions directly from the content.
+Task: Expand the provided safety topic into a concise but comprehensive set of clear “Dos and Don’ts” that teach children exactly what they should always do, what they must never do, and who they should contact in an emergency.
+
+Requirements:
+1) Focus strictly on rules and safety actions. Clearly state behaviors a child must always follow and actions they must absolutely avoid.
+2) Include practical safety instructions that are realistic for children ages 5–10.
+3) Clearly identify trusted people or emergency contacts children should reach out to when they need help.
+4) Write in simple, direct, empowering language that young children can easily understand.
+5) Ensure the paragraph contains enough distinct safety rules so that at least three to five quiz questions could be created from it.
+
+Important restrictions:
+- Do NOT include fictional characters, names, role-play situations, or storytelling elements.
+- Do NOT create imaginary scenarios or narratives.
+- Avoid scary, graphic, or emotionally overwhelming language.
+- Focus only on real-world safety behaviors and responsible actions.
+
+Context:
+Topic: {topic}
+
+Output Constraints:
+- Format: One single paragraph only.
+- Style: Clear, educational, rule-based, and child-friendly.
+- Tone: Calm, supportive, and instructive.
+- Scope: Only factual safety rules and guidance; no stories or dialogue.
+- Length: Dense enough to contain multiple rules but still concise and readable for children.
+
+Before finalizing, verify that the paragraph contains multiple clear rules, includes both “do” and “do not” behaviors, and mentions who to contact for help in an emergency.
+
+Take a deep breath and work on this problem step-by-step."""
+
 PROMPT_TEMPLATE = """Act like an expert educational content designer specializing in child safety.
 Your goal is to generate engaging, age-appropriate quiz scenarios for children aged 5 to 10, focused on safety topics (e.g., talking with strangers, drug use). The content should be concise, easy to understand, and adaptable for accompanying visual aids.
 Task: Create a child safety scenario quiz in JSON format.

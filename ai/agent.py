@@ -17,6 +17,75 @@ class ImagePrompts(BaseModel):
     success_image_prompt: str
     failure_image_prompt: str
 
+class ExpandedTopic(BaseModel):
+    description: str
+
+def expand_topic(topic: str) -> str:
+    prompt = PROMPT_TOPIC_EXPENSION_TEMPLATE.format(topic=topic)
+
+    payload = {
+        "model": MODEL_ID,
+        "messages": [
+            {"role": "user", "content": prompt}
+        ],
+        "temperature": 0.1,
+        "stream": False,
+    }
+
+    response = requests.post(
+        f"{LM_STUDIO_BASE_URL}/v1/chat/completions",
+        headers={"Content-Type": "application/json"},
+        json=payload,
+        # timeout=60,
+    )
+    response.raise_for_status()
+
+    data = response.json()
+
+    raw_text = ""
+    if "choices" in data and len(data["choices"]) > 0:
+         try:
+             raw_text = data["choices"][0]["message"]["content"]
+         except (KeyError, IndexError):
+             pass
+
+    if not raw_text:
+        # Fallback for other formats
+        output_items = data.get("output", [])
+        for item in output_items:
+            if item.get("type") == "message":
+                raw_text = item.get("content", "")
+                break
+    
+    if not raw_text:
+        raise ValueError(f"No message content found in API response: {data}")
+
+    # Remove markdown code blocks if present
+    raw_text = raw_text.strip()
+    if "```" in raw_text:
+        # Extract content between first and last ``` block
+        parts = raw_text.split("```")
+        # Usually the content is in the second part (index 1) 
+        # e.g. "Here is the json:\n```json\n{...}\n```"
+        if len(parts) >= 3:
+            raw_text = parts[1]
+            if raw_text.startswith("json"):
+                raw_text = raw_text[4:]
+        else:
+            # Fallback for "``` {...} ```"
+            raw_text = raw_text.replace("```json", "").replace("```", "")
+            
+    raw_text = raw_text.strip()
+
+    try:
+        # Use Pydantic for validation
+        expanded_topic = ExpandedTopic.model_validate_json(raw_text)
+        return expanded_topic.description
+    except ValidationError as e:
+        raise ValueError(f"Failed to validate model output: {e}\nRaw output:\n{raw_text}")
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Failed to parse model output as JSON: {e}\nRaw output:\n{raw_text}")
+
 def generate_safety_quiz(topic: str) -> dict:
     """
     Generates a child safety quiz scenario for the given topic
@@ -47,7 +116,7 @@ def generate_safety_quiz(topic: str) -> dict:
         f"{LM_STUDIO_BASE_URL}/v1/chat/completions",
         headers={"Content-Type": "application/json"},
         json=payload,
-        timeout=60,
+        # timeout=60,
     )
     response.raise_for_status()
 
@@ -140,7 +209,7 @@ def generate_safety_quiz_continuation(
         f"{LM_STUDIO_BASE_URL}/v1/chat/completions",
         headers={"Content-Type": "application/json"},
         json=payload,
-        timeout=60,
+        # timeout=60,
     )
     response_http.raise_for_status()
 
@@ -228,7 +297,7 @@ def generate_image_prompts(
         f"{LM_STUDIO_BASE_URL}/v1/chat/completions",
         headers={"Content-Type": "application/json"},
         json=payload,
-        timeout=60,
+        # timeout=60,
     )
     response.raise_for_status()
 
