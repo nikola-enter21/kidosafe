@@ -3,9 +3,12 @@ import AddRounded from '@mui/icons-material/AddRounded'
 import ArrowBackRounded from '@mui/icons-material/ArrowBackRounded'
 import ArrowDownwardRounded from '@mui/icons-material/ArrowDownwardRounded'
 import ArrowUpwardRounded from '@mui/icons-material/ArrowUpwardRounded'
+import AutoAwesomeRounded from '@mui/icons-material/AutoAwesomeRounded'
 import DeleteOutlineRounded from '@mui/icons-material/DeleteOutlineRounded'
 import SaveRounded from '@mui/icons-material/SaveRounded'
 import { type ChangeEvent, useEffect, useMemo, useRef, useState } from 'react'
+
+import { GenerateScenarioOverlay } from '@/features/generate-scenario/GenerateScenarioOverlay'
 
 import { useGameStore } from '@/entities/game/model/gameStore'
 import { CATEGORIES, getCategoryById } from '@/entities/scenario/model/categories'
@@ -95,6 +98,7 @@ export function EditorPage() {
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [generateOpen, setGenerateOpen] = useState(false)
 
   useEffect(() => {
     getActiveDataset()
@@ -377,9 +381,24 @@ export function EditorPage() {
         <Paper sx={{ bgcolor: '#121a2d', color: '#fff', p: 2, borderRadius: 3 }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.25 }}>
             <Typography sx={{ fontWeight: 800 }}>Scenarios</Typography>
-            <Button size="small" startIcon={<AddRounded />} onClick={handleAddScenario}>
-              Add
-            </Button>
+            <Stack direction="row" spacing={0.75}>
+              <Button
+                size="small"
+                startIcon={<AutoAwesomeRounded />}
+                onClick={() => setGenerateOpen(true)}
+                sx={{
+                  background: 'linear-gradient(135deg, #667eea, #a78bfa)',
+                  color: '#fff',
+                  fontWeight: 700,
+                  '&:hover': { background: 'linear-gradient(135deg, #5a67d8, #9f7aea)' },
+                }}
+              >
+                Generate
+              </Button>
+              <Button size="small" startIcon={<AddRounded />} onClick={handleAddScenario}>
+                Add
+              </Button>
+            </Stack>
           </Stack>
 
           <Stack spacing={1.1}>
@@ -691,6 +710,18 @@ export function EditorPage() {
           )}
         </Paper>
       </Box>
+
+      <GenerateScenarioOverlay
+        open={generateOpen}
+        categoryId={selectedCategory}
+        onAdd={scenario => {
+          updateCategoryScenarios(selectedCategory, list => [...list, scenario])
+          setSelectedScenarioId(scenario.id)
+          setGenerateOpen(false)
+          setMessage('✨ AI scenario added successfully!')
+        }}
+        onClose={() => setGenerateOpen(false)}
+      />
     </Box>
   )
 }
