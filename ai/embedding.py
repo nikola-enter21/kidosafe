@@ -2,18 +2,35 @@ from env import *
 import requests
 import numpy as np
 
-response = requests.get(f"{BACKEND_URL}/get_descriptions")
 materials = {}
 dimensionality = 1024
 threshold = 0.5
 
 def initialize_materials_and_embeddings():
+    response = requests.get(f"{BACKEND_URL}/api/get_descriptions")
+
+    materials.clear()
+
     if response.status_code == 200:
-        for item in response.json():
-            material_id = item.get("material_id")
-            description = item.get("description")
-            if material_id and description:
-                materials[material_id] = description
+        payload = response.json()
+
+        # Backend currently returns parallel arrays: id_material + description.
+        if isinstance(payload, dict):
+            material_ids = payload.get("id_material", [])
+            descriptions = payload.get("description", [])
+            for material_id, description in zip(material_ids, descriptions):
+                if material_id and description:
+                    materials[material_id] = description
+        # Keep compatibility with a list-of-dicts payload shape.
+        elif isinstance(payload, list):
+            for item in payload:
+                if not isinstance(item, dict):
+                    continue
+                material_id = item.get("material_id") or item.get("id")
+                description = item.get("description")
+                if material_id and description:
+                    materials[material_id] = description
+
         print(f"Successfully loaded {len(materials)} materials from backend.")
     else:
         print(f"Failed to load materials: {response.status_code}")
@@ -32,17 +49,15 @@ def initialize_materials_and_embeddings():
             vector = np.zeros(dimensionality)
 
         if embeddings is None:
-            embeddings = np.array(response.json().get("embedding"))
+            embeddings = np.array(vector)
             continue
             
-        new_embedding = np.array(response.json().get("embedding"))
+        new_embedding = np.array(vector)
         embeddings = np.vstack([embeddings, new_embedding])
 
     return embeddings, materials, id_to_material
 
-embeddings, materials, id_to_material = initialize_materials_and_embeddings()
-
-def get_most_relevant_materials(query: str, top_k: int = 1):
+def get_most_relevant_materials(query: str, embeddings, id_to_material, top_k: int = 1):
     response = requests.post(f"{EMBEDDINGS_URL}", json={"text": query})
     if response.status_code == 200:
         print("Successfully sent query to embeddings service.")
