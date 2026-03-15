@@ -38,7 +38,7 @@ def initialize_materials_and_embeddings():
     embeddings = None
     id_to_material = {}
 
-    for id, (material_id, description) in enumerate(zip(materials["id_material"], materials["description"])):
+    for id, (material_id, description) in enumerate(materials.items()):
         id_to_material[id] = material_id
         response = requests.post(f"{EMBEDDINGS_URL}", json={"text": description})
         if response.status_code == 200:
@@ -72,6 +72,6 @@ def get_most_relevant_materials(query: str, embeddings, id_to_material, top_k: i
 
     similarities = np.dot(embeddings, query_vector) / (np.linalg.norm(embeddings, axis=1) * np.linalg.norm(query_vector) + 1e-10)
     top_indices = np.argsort(similarities)[-top_k:][::-1]
-    relevant_materials = [(id_to_material[idx], materials["description"][idx], similarities[idx]) for idx in top_indices if similarities[idx] >= threshold]
+    relevant_materials = [(id_to_material[idx], materials[id_to_material[idx]], similarities[idx]) for idx in top_indices if similarities[idx] >= threshold]
 
     return relevant_materials
