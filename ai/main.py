@@ -18,7 +18,7 @@ class UserRation(BaseModel):
 def read_root():
     return {"status": "ok", "message": "AI Service is running"}
 
-@app.get("/api/categories/{category}/generate_scenario")
+@app.get("/api/{category}/generate_scenario")
 def generate_scenario(category: str):
     generated_quiz = generate_safety_quiz(category)
 
