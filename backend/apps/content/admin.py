@@ -2,10 +2,6 @@ from django.contrib import admin
 from .models import Category, Scenario, Choice
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Inline
-# ─────────────────────────────────────────────────────────────────────────────
-
 class ChoiceInline(admin.TabularInline):
     model = Choice
     extra = 0
@@ -23,10 +19,6 @@ class ScenarioInline(admin.TabularInline):
     ordering = ('order', 'created_at')
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Category admin
-# ─────────────────────────────────────────────────────────────────────────────
-
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('id', 'emoji', 'label', 'color', 'scenario_count')
@@ -38,10 +30,6 @@ class CategoryAdmin(admin.ModelAdmin):
     def scenario_count(self, obj):
         return obj.scenarios.count()
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Scenario admin
-# ─────────────────────────────────────────────────────────────────────────────
 
 @admin.register(Scenario)
 class ScenarioAdmin(admin.ModelAdmin):
@@ -80,10 +68,6 @@ class ScenarioAdmin(admin.ModelAdmin):
     def choice_count(self, obj):
         return obj.choices.count()
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Choice admin
-# ─────────────────────────────────────────────────────────────────────────────
 
 @admin.register(Choice)
 class ChoiceAdmin(admin.ModelAdmin):

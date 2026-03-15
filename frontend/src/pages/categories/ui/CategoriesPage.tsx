@@ -19,7 +19,6 @@ export function CategoriesPage() {
         position: 'relative',
       }}
     >
-      {/* Radial glow top-right */}
       <Box
         sx={{
           position: 'absolute',
@@ -33,7 +32,7 @@ export function CategoriesPage() {
           pointerEvents: 'none',
         }}
       />
-      {/* Radial glow bottom-left */}
+
       <Box
         sx={{
           position: 'absolute',
@@ -48,7 +47,6 @@ export function CategoriesPage() {
         }}
       />
 
-      {/* ── Header ─────────────────────────────────────────────────── */}
       <Box
         sx={{
           display: 'flex',
@@ -79,7 +77,6 @@ export function CategoriesPage() {
         </motion.div>
       </Box>
 
-      {/* ── Title section ───────────────────────────────────────────── */}
       <Box
         sx={{
           px: { xs: 2.5, md: 4, lg: 6 },
@@ -117,7 +114,6 @@ export function CategoriesPage() {
         </motion.div>
       </Box>
 
-      {/* ── Grid ────────────────────────────────────────────────────── */}
       <Box
         sx={{
           flex: 1,

@@ -18,7 +18,6 @@ import type { Scenario } from '@/entities/scenario/model/types'
 import type { CategoryId } from '@/shared/types/game'
 import { getCategoryById } from '@/entities/scenario/model/categories'
 
-// ─── Loading steps ────────────────────────────────────────────────────────────
 
 const STEPS = [
   { emoji: '⚡', label: 'Contacting AI service…' },
@@ -29,7 +28,6 @@ const STEPS = [
 
 const STEP_DURATION_MS = 14_000 // auto-advance visual step every 14s
 
-// ─── Types ────────────────────────────────────────────────────────────────────
 
 type Phase = 'loading' | 'success' | 'error'
 
@@ -40,7 +38,6 @@ interface Props {
   onClose: () => void
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
 
 export function GenerateScenarioOverlay({ open, categoryId, onAdd, onClose }: Props) {
   const [phase, setPhase] = useState<Phase>('loading')
@@ -51,7 +48,6 @@ export function GenerateScenarioOverlay({ open, categoryId, onAdd, onClose }: Pr
 
   const category = getCategoryById(categoryId)
 
-  // ── Trigger generation whenever overlay opens ────────────────────────────
   useEffect(() => {
     if (!open) return
 
@@ -74,7 +70,6 @@ export function GenerateScenarioOverlay({ open, categoryId, onAdd, onClose }: Pr
       })
   }, [open, categoryId])
 
-  // ── Auto-advance loading step indicator ──────────────────────────────────
   useEffect(() => {
     if (phase !== 'loading') return
     if (stepIndex >= STEPS.length - 1) return
@@ -150,7 +145,6 @@ export function GenerateScenarioOverlay({ open, categoryId, onAdd, onClose }: Pr
   )
 }
 
-// ─── Loading pane ─────────────────────────────────────────────────────────────
 
 function LoadingPane({ stepIndex, color }: { stepIndex: number; color: string }) {
   return (
@@ -161,7 +155,6 @@ function LoadingPane({ stepIndex, color }: { stepIndex: number; color: string })
       transition={{ duration: 0.3 }}
       style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 420, padding: 40, position: 'relative' }}
     >
-      {/* Background glow */}
       <Box
         sx={{
           position: 'absolute',
@@ -171,7 +164,6 @@ function LoadingPane({ stepIndex, color }: { stepIndex: number; color: string })
         }}
       />
 
-      {/* Robot emoji pulse */}
       <motion.div
         animate={{ scale: [1, 1.12, 1] }}
         transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
@@ -191,7 +183,6 @@ function LoadingPane({ stepIndex, color }: { stepIndex: number; color: string })
 
       <CircularProgress size={48} sx={{ color: '#a78bfa', mb: 4 }} />
 
-      {/* Step indicators */}
       <Stack spacing={1.2} sx={{ width: '100%', maxWidth: 340 }}>
         {STEPS.map((step, i) => {
           const done = i < stepIndex
@@ -243,8 +234,6 @@ function LoadingPane({ stepIndex, color }: { stepIndex: number; color: string })
   )
 }
 
-// ─── Success pane ─────────────────────────────────────────────────────────────
-
 function SuccessPane({
   scenario,
   categoryLabel,
@@ -266,7 +255,7 @@ function SuccessPane({
       transition={{ duration: 0.4 }}
       style={{ padding: 32, overflowY: 'auto', maxHeight: '90vh' }}
     >
-      {/* Header */}
+
       <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 3 }}>
         <AutoAwesomeRounded sx={{ color: '#a78bfa', fontSize: 28 }} />
         <Box>
@@ -279,7 +268,6 @@ function SuccessPane({
         </Box>
       </Stack>
 
-      {/* Images row */}
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mb: 3 }}>
         {[
           { label: '📷 Question', url: scenario.imageUrl },
@@ -317,7 +305,6 @@ function SuccessPane({
         ))}
       </Stack>
 
-      {/* Question */}
       <Paper
         sx={{
           bgcolor: '#121a2d',
@@ -335,7 +322,6 @@ function SuccessPane({
         </Typography>
       </Paper>
 
-      {/* Choices */}
       <Stack spacing={1} sx={{ mb: 3.5 }}>
         {scenario.choices.map((choice, i) => (
           <Paper
@@ -368,7 +354,6 @@ function SuccessPane({
         ))}
       </Stack>
 
-      {/* Actions */}
       <Stack direction="row" spacing={1.5} justifyContent="flex-end">
         <Button
           variant="outlined"
@@ -397,8 +382,6 @@ function SuccessPane({
     </motion.div>
   )
 }
-
-// ─── Error pane ───────────────────────────────────────────────────────────────
 
 function ErrorPane({
   message,

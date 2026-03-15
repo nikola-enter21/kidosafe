@@ -50,9 +50,7 @@ function normalizeDatasetOrders(dataset: ContentDataset): ContentDataset {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 // Game helpers
-// ─────────────────────────────────────────────────────────────────────────────
 
 export async function getScenariosByCategory(categoryId: CategoryId): Promise<Scenario[]> {
   const scenarios = await getCategoryScenarios(categoryId)
@@ -81,10 +79,7 @@ export async function getTotalScenarioCount(): Promise<number> {
   return categories.reduce((sum, c) => sum + c.scenarioCount, 0)
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 // Editor helpers
-// ─────────────────────────────────────────────────────────────────────────────
-
 export async function getActiveDataset(): Promise<ContentDataset> {
   const exported = await exportDatasetFromApi()
   return normalizeDatasetOrders({
