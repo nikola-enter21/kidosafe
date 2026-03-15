@@ -203,7 +203,7 @@ class MaterialInputSerializer(serializers.Serializer):
     id_material           = serializers.CharField(required=False, allow_null=True, allow_blank=True, default=None)
     question              = serializers.CharField()
     answers               = serializers.ListField(
-                              child=serializers.DictField(child=serializers.CharField()),
+                              child=serializers.DictField(child=serializers.CharField(allow_blank=True)),
                               min_length=2,
                           )
     correctAnswer         = serializers.IntegerField(min_value=0, required=False)
@@ -213,6 +213,10 @@ class MaterialInputSerializer(serializers.Serializer):
     failure_image_prompt  = serializers.CharField(required=False, allow_blank=True, default='')
 
     def validate(self, data):
+        data['answers'] = [
+            a if isinstance(a, dict) else {'text': str(a), 'feedback': ''}
+            for a in data['answers']
+        ]
         # Accept either camelCase (correctAnswer) or snake_case (correct_answer)
         if 'correct_answer' in data and 'correctAnswer' not in data:
             data['correctAnswer'] = data.pop('correct_answer')

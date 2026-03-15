@@ -68,9 +68,9 @@ export const deleteScenario = (id: string) =>
 export const exportDatasetFromApi = () =>
   get<ExportDataset>('/api/scenarios/export')
 
-/** GET /api/categories/{id}/generate_scenario/ – AI-generated scenario */
+/** GET /api/categories/{id}/generate_scenario/ – AI-generated scenario (long timeout for image generation) */
 export const generateScenario = (categoryId: CategoryId) =>
-  get<Scenario>(`/api/categories/${categoryId}/generate_scenario/`)
+  get<Scenario>(`/api/categories/${categoryId}/generate_scenario/`, 300_000)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Choices
