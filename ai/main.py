@@ -33,7 +33,7 @@ def generate_scenario(category: str):
         
         return {
             "id_material": None,
-            "question": generated_quiz.get("question"),
+            "question": generated_quiz.get("scenario") + " " + generated_quiz.get("question"),
             "answers": generated_quiz.get("answers"),
             "correct_answer": generated_quiz.get("correct_answer"),
             "question_image_prompt": image_prompts.get("question_image_prompt"),
@@ -43,7 +43,7 @@ def generate_scenario(category: str):
     
     return {
         "id_material": rel_doc[0][0],
-        "question": generated_quiz.get("question"),
+        "question": generated_quiz.get("scenario") + " " + generated_quiz.get("question"),
         "answers": generated_quiz.get("answers"),
         "correct_answer": generated_quiz.get("correct_answer"),
         "question_image_prompt": None,

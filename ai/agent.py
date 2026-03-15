@@ -17,9 +17,6 @@ class ImagePrompts(BaseModel):
     success_image_prompt: str
     failure_image_prompt: str
 
-class ExpandedTopic(BaseModel):
-    description: str
-
 def expand_topic(topic: str) -> str:
     prompt = PROMPT_TOPIC_EXPENSION_TEMPLATE.format(topic=topic)
 
@@ -77,14 +74,7 @@ def expand_topic(topic: str) -> str:
             
     raw_text = raw_text.strip()
 
-    try:
-        # Use Pydantic for validation
-        expanded_topic = ExpandedTopic.model_validate_json(raw_text)
-        return expanded_topic.description
-    except ValidationError as e:
-        raise ValueError(f"Failed to validate model output: {e}\nRaw output:\n{raw_text}")
-    except json.JSONDecodeError as e:
-        raise ValueError(f"Failed to parse model output as JSON: {e}\nRaw output:\n{raw_text}")
+    return raw_text
 
 def generate_safety_quiz(topic: str) -> dict:
     """
