@@ -274,7 +274,8 @@ def _bulk_create_choices(scenario: Scenario, answers: list, correct_idx: int) ->
         Choice(
             id=_choice_id(scenario.id),
             scenario=scenario,
-            text=answers[i],
+            text=answers[i]['text'],
+            feedback=answers[i].get('feedback', ''),
             is_correct=(i == correct_idx),
             order=i,
         )

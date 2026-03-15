@@ -201,7 +201,10 @@ class MaterialInputSerializer(serializers.Serializer):
     """
     id_material           = serializers.CharField(required=False, allow_null=True, allow_blank=True, default=None)
     question              = serializers.CharField()
-    answers               = serializers.ListField(child=serializers.CharField(), min_length=2)
+    answers               = serializers.ListField(
+                              child=serializers.DictField(child=serializers.CharField()),
+                              min_length=2,
+                          )
     correctAnswer         = serializers.IntegerField(min_value=0, required=False)
     correct_answer        = serializers.IntegerField(min_value=0, required=False, write_only=True)
     question_image_prompt = serializers.CharField(required=False, allow_blank=True, default='')
