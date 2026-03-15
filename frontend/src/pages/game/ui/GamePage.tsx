@@ -513,8 +513,7 @@ export function GamePage() {
                   {answerState === 'correct' ? '✅ Correct choice' : '❌ Wrong choice'}
                 </Typography>
                 <Typography sx={{ color: '#475569', fontSize: '0.92rem', mb: 1.8 }}>
-                  {selectedChoice
-        ? `${selectedChoice.feedbackEmoji} ${selectedChoice.feedback}`
+                  {selectedChoice ? selectedChoice.feedback
         : 'The result video is now playing. Continue when you are ready.'}
                 </Typography>
                 <Button
