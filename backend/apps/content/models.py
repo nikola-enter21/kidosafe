@@ -1,11 +1,6 @@
 import uuid
 from django.db import models
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Helpers
-# ─────────────────────────────────────────────────────────────────────────────
-
 def _scenario_id(category_id: str) -> str:
     return f"{category_id}-{uuid.uuid4().hex[:8]}"
 
@@ -13,10 +8,6 @@ def _scenario_id(category_id: str) -> str:
 def _choice_id(scenario_id: str) -> str:
     return f"{scenario_id}-{uuid.uuid4().hex[:4]}"
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Category
-# ─────────────────────────────────────────────────────────────────────────────
 
 class Category(models.Model):
     """
@@ -39,11 +30,6 @@ class Category(models.Model):
 
     def __str__(self) -> str:
         return f"{self.emoji} {self.label}"
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Scenario
-# ─────────────────────────────────────────────────────────────────────────────
 
 class Scenario(models.Model):
     """
@@ -78,7 +64,6 @@ class Scenario(models.Model):
         help_text='Video shown after a correct choice (.mp4/.webm path or URL)',
     )
 
-    # Image fields (shown when no video is available for the given state)
     image_url = models.CharField(
         max_length=500,
         blank=True,
@@ -98,14 +83,12 @@ class Scenario(models.Model):
         help_text='Image shown after a wrong choice (fallback when no wrong_video_url)',
     )
 
-    # Description (plain-text summary of the scenario / media — for future AI matching)
     description = models.TextField(
         blank=True,
         default='',
         help_text='Short description of the scenario media (used for AI matching)',
     )
 
-    # SceneConfig (embedded)
     scene_background = models.CharField(
         max_length=200,
         default='linear-gradient(135deg,#667eea,#764ba2)',
@@ -129,10 +112,6 @@ class Scenario(models.Model):
             self.id = _scenario_id(self.category_id)
         super().save(*args, **kwargs)
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Choice
-# ─────────────────────────────────────────────────────────────────────────────
 
 class Choice(models.Model):
     """

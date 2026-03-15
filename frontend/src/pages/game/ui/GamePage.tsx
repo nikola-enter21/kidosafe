@@ -28,7 +28,6 @@ export function GamePage() {
 
   const isSmartMode = gameMode === 'smart'
 
-  // Loading screen between smart mode scenarios
   if (isLoadingNextScenario) {
     return (
       <Box
@@ -55,18 +54,18 @@ export function GamePage() {
   const cat = getCategoryById(selectedCategory)
   const progress = isSmartMode ? 0 : (currentIndex / totalScenarios) * 100
   const isAnswered = answerState !== 'idle'
-  // In smart mode there's no "last" scenario — game ends only on death or exhaustion
+
   const isLastScenario = isSmartMode ? !!lastResult : currentIndex === totalScenarios - 1
   const selectedChoice = isAnswered
     ? currentScenario.choices.find(c => c.id === selectedChoiceId)
     : null
-  // Triplet = scenario has distinct question + correct + wrong media (video OR image)
+
   const isTriplet = Boolean(
     (currentScenario.questionVideoUrl || currentScenario.imageUrl) &&
     (currentScenario.correctVideoUrl  || currentScenario.imageUrlCorrect) &&
     (currentScenario.wrongVideoUrl    || currentScenario.imageUrlWrong),
   )
-  // Active video for the current state
+
   const activeSceneVideoUrl = isTriplet
     ? isAnswered
       ? answerState === 'correct'
@@ -74,7 +73,7 @@ export function GamePage() {
         : currentScenario.wrongVideoUrl
       : currentScenario.questionVideoUrl
     : currentScenario.videoUrl
-  // Active image fallback for the current state (used when no video)
+
   const activeSceneImageUrl = isTriplet
     ? isAnswered
       ? answerState === 'correct'
@@ -82,7 +81,7 @@ export function GamePage() {
         : currentScenario.imageUrlWrong
       : currentScenario.imageUrl
     : currentScenario.imageUrl
-  // Pause only while choices are shown but not yet answered; result media should auto-play
+
   const shouldPauseScene = isTriplet
     ? choicesUnlocked && !isAnswered
     : choicesUnlocked || isAnswered
@@ -101,7 +100,7 @@ export function GamePage() {
         overflow: 'hidden',
       }}
     >
-      {/* ── TOP NAVIGATION BAR ──────────────────────────────────────── */}
+
       <Box
         sx={{
           height: 64,
@@ -115,7 +114,7 @@ export function GamePage() {
           zIndex: 30,
         }}
       >
-        {/* Logo */}
+
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mr: 0.5, flexShrink: 0 }}>
           <Typography sx={{ fontSize: '1.4rem', lineHeight: 1 }}>🦸</Typography>
           <Typography
@@ -125,7 +124,7 @@ export function GamePage() {
           </Typography>
         </Box>
 
-        {/* Category badge */}
+
         <Box
           sx={{
             bgcolor: cat.color,
@@ -144,7 +143,7 @@ export function GamePage() {
           {cat.emoji} {cat.label}
         </Box>
 
-        {/* Progress bar — fills the middle */}
+
         <Box sx={{ flex: 1, mx: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
           <Box sx={{ flex: 1 }}>
             <LinearProgress
@@ -191,7 +190,6 @@ export function GamePage() {
           )}
         </Box>
 
-        {/* Stats pills */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
           <StatPill label={`${'❤️'.repeat(lives)}${'🖤'.repeat(3 - lives)}`} />
           <StatPill label={`🔥 ${streak}`} />
@@ -199,7 +197,6 @@ export function GamePage() {
           <StatPill label={`⏱ ${activeSeconds}s`} isAlert={isTimerLow} />
         </Box>
 
-        {/* Nav buttons */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, ml: 1, flexShrink: 0 }}>
           <Button
             size="small"
@@ -239,10 +236,8 @@ export function GamePage() {
         </Box>
       </Box>
 
-      {/* ── MAIN CONTENT ─────────────────────────────────────────────── */}
       <Box sx={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
 
-        {/* ── LEFT: Video / Scene (58%) ──────────────────────────── */}
         <Box sx={{ flex: '0 0 58%', position: 'relative', overflow: 'hidden', bgcolor: '#000' }}>
           <AnimatePresence mode="wait">
             <motion.div
@@ -263,7 +258,6 @@ export function GamePage() {
             </motion.div>
           </AnimatePresence>
 
-          {/* Status chip overlay */}
           <Box sx={{ position: 'absolute', top: 16, left: 16, zIndex: 10, pointerEvents: 'none' }}>
             <AnimatePresence mode="wait">
               <motion.div
@@ -304,7 +298,6 @@ export function GamePage() {
             </AnimatePresence>
           </Box>
 
-          {/* Vertical separator glow */}
           <Box
             sx={{
               position: 'absolute',
@@ -318,7 +311,6 @@ export function GamePage() {
           />
         </Box>
 
-        {/* ── RIGHT: Interactive Panel (42%) ───────────────────────── */}
         <Box
           sx={{
             flex: 1,
@@ -329,7 +321,7 @@ export function GamePage() {
             overflow: 'hidden',
           }}
         >
-          {/* Top accent line */}
+
           <Box
             sx={{
               height: 4,
@@ -338,7 +330,6 @@ export function GamePage() {
             }}
           />
 
-          {/* Subtle dot-grid background */}
           <Box
             sx={{
               position: 'absolute',
@@ -350,7 +341,6 @@ export function GamePage() {
             }}
           />
 
-          {/* Scrollable content */}
           <Box
             sx={{
               flex: 1,
@@ -523,8 +513,7 @@ export function GamePage() {
                   {answerState === 'correct' ? '✅ Correct choice' : '❌ Wrong choice'}
                 </Typography>
                 <Typography sx={{ color: '#475569', fontSize: '0.92rem', mb: 1.8 }}>
-                  {selectedChoice
-        ? `${selectedChoice.feedbackEmoji} ${selectedChoice.feedback}`
+                  {selectedChoice ? selectedChoice.feedback
         : 'The result video is now playing. Continue when you are ready.'}
                 </Typography>
                 <Button
@@ -559,7 +548,6 @@ export function GamePage() {
   )
 }
 
-// ── StatPill ────────────────────────────────────────────────────────────────
 function StatPill({ label, isAlert = false }: { label: string; isAlert?: boolean }) {
   return (
     <Box

@@ -2,10 +2,6 @@ from rest_framework import serializers
 from .models import Category, Scenario, Choice
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Category
-# ─────────────────────────────────────────────────────────────────────────────
-
 class CategorySerializer(serializers.ModelSerializer):
     """
     Full CRUD serializer for Category.
@@ -22,10 +18,6 @@ class CategorySerializer(serializers.ModelSerializer):
     def get_scenarioCount(self, obj) -> int:
         return obj.scenarios.count()
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Choice
-# ─────────────────────────────────────────────────────────────────────────────
 
 class ChoiceSerializer(serializers.ModelSerializer):
     """
@@ -59,9 +51,6 @@ class ChoiceSerializer(serializers.ModelSerializer):
         return result
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Scenario
-# ─────────────────────────────────────────────────────────────────────────────
 
 class ScenarioSerializer(serializers.ModelSerializer):
     """
@@ -94,7 +83,6 @@ class ScenarioSerializer(serializers.ModelSerializer):
     imageUrlWrong = serializers.CharField(
         source='image_url_wrong', required=False, allow_blank=True, default=''
     )
-    # Legacy alias from older editor payloads; mapped to question_video_url in to_internal_value.
     videoUrl = serializers.CharField(required=False, allow_blank=True, write_only=True, default='')
     choices = ChoiceSerializer(many=True, required=False)
 
@@ -112,11 +100,8 @@ class ScenarioSerializer(serializers.ModelSerializer):
             'order': {'required': False, 'default': 0},
         }
 
-    # ── READ: inject scene object into output ─────────────────────────────
-
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        # Keep legacy key for frontend compatibility (single-video flow).
         data['videoUrl'] = data.get('questionVideoUrl', '')
         data['scene'] = {
             'background': instance.scene_background,
@@ -125,10 +110,7 @@ class ScenarioSerializer(serializers.ModelSerializer):
         }
         return data
 
-    # ── WRITE: extract scene from input before validation ─────────────────
-
     def to_internal_value(self, data):
-        # Pull out 'scene' before calling super so DRF doesn't reject it.
         if isinstance(data, dict):
             scene_was_provided = 'scene' in data
             scene = data.get('scene') or {}
@@ -140,12 +122,10 @@ class ScenarioSerializer(serializers.ModelSerializer):
 
         result = super().to_internal_value(remaining)
 
-        # Legacy field alias: videoUrl -> question_video_url (unless explicit questionVideoUrl exists).
         legacy_video_url = result.pop('videoUrl', '')
         if legacy_video_url and not result.get('question_video_url'):
             result['question_video_url'] = legacy_video_url
 
-        # Merge scene fields into validated data only when scene is explicitly present.
         if scene_was_provided:
             result['scene_background'] = scene.get(
                 'background', 'linear-gradient(135deg,#667eea,#764ba2)'
@@ -153,8 +133,6 @@ class ScenarioSerializer(serializers.ModelSerializer):
             result['scene_emoji'] = scene.get('emoji', '🎯')
             result['scene_label'] = scene.get('label', 'Safety Scenario')
         return result
-
-    # ── CREATE ────────────────────────────────────────────────────────────
 
     def create(self, validated_data):
         choices_data = validated_data.pop('choices', [])
@@ -166,8 +144,6 @@ class ScenarioSerializer(serializers.ModelSerializer):
             Choice.objects.create(scenario=scenario, **cd)
         return scenario
 
-    # ── UPDATE ────────────────────────────────────────────────────────────
-
     def update(self, instance, validated_data):
         choices_data = validated_data.pop('choices', None)
 
@@ -175,7 +151,6 @@ class ScenarioSerializer(serializers.ModelSerializer):
             setattr(instance, attr, value)
         instance.save()
 
-        # Replace all choices if the field is present in the request
         if choices_data is not None:
             instance.choices.all().delete()
             for idx, choice_data in enumerate(choices_data):
@@ -187,13 +162,6 @@ class ScenarioSerializer(serializers.ModelSerializer):
         return instance
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Scenario list (lightweight, no nested choices)
-# ─────────────────────────────────────────────────────────────────────────────
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Material input (generate_scenario endpoint)
-# ─────────────────────────────────────────────────────────────────────────────
 
 class MaterialInputSerializer(serializers.Serializer):
     """

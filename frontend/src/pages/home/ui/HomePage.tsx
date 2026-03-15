@@ -194,7 +194,6 @@ export function HomePage() {
             </Box>
           </motion.div>
 
-          {/* ── CTA: USERNAME INPUT or PLAY BUTTONS ─────────────────────── */}
           <motion.div
             initial={{ opacity: 0, scale: 0.88 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -202,7 +201,6 @@ export function HomePage() {
           >
             <AnimatePresence mode="wait">
               {!hasPlayer ? (
-                /* ── No player: show username input ─────────────────────── */
                 <motion.div
                   key="username-form"
                   initial={{ opacity: 0, y: 12 }}
@@ -266,7 +264,6 @@ export function HomePage() {
                   </Box>
                 </motion.div>
               ) : (
-                /* ── Has player: show play + studio buttons ──────────────── */
                 <motion.div
                   key="play-buttons"
                   initial={{ opacity: 0, y: 12 }}

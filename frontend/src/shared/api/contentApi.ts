@@ -7,9 +7,6 @@ import { ML_API_URL } from '@/shared/config/urls'
 import type { Scenario, Choice } from '@/entities/scenario/model/types'
 import type { CategoryId, Player } from '@/shared/types/game'
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Types
-// ─────────────────────────────────────────────────────────────────────────────
 
 export interface ApiCategory {
   id: CategoryId
@@ -28,9 +25,6 @@ export interface ExportDataset {
   scenariosByCategory: Record<CategoryId, Scenario[]>
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Categories
-// ─────────────────────────────────────────────────────────────────────────────
 
 /** GET /api/categories/ */
 export const getCategories = () =>
@@ -40,9 +34,6 @@ export const getCategories = () =>
 export const getCategoryScenarios = (catId: CategoryId) =>
   get<Scenario[]>(`/api/categories/${catId}/scenarios/`)
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Scenarios
-// ─────────────────────────────────────────────────────────────────────────────
 
 /** GET /api/scenarios/{id}/ */
 export const getScenario = (id: string) =>
@@ -72,9 +63,6 @@ export const exportDatasetFromApi = () =>
 export const generateScenario = (categoryId: CategoryId) =>
   get<Scenario>(`/api/categories/${categoryId}/generate_scenario/`, 300_000)
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Choices
-// ─────────────────────────────────────────────────────────────────────────────
 
 /** GET /api/scenarios/{id}/choices/ */
 export const getScenarioChoices = (scenarioId: string) =>
@@ -96,9 +84,6 @@ export const updateChoice = (id: string, data: Partial<Choice>) =>
 export const deleteChoice = (id: string) =>
   del(`/api/choices/${id}/`)
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Players
-// ─────────────────────────────────────────────────────────────────────────────
 
 /** POST /api/players/ → get_or_create by username */
 export const getOrCreatePlayer = (username: string) =>
@@ -115,9 +100,6 @@ export interface RecordSessionPayload {
 export const recordSession = (playerId: number, data: RecordSessionPayload) =>
   post<Player>(`/api/players/${playerId}/record-session/`, data)
 
-// ─────────────────────────────────────────────────────────────────────────────
-// ML Service
-// ─────────────────────────────────────────────────────────────────────────────
 
 /** POST {ML_API_URL}/get_next_category – returns the recommended next category */
 export const getNextCategory = (ratio: Record<string, number>) =>

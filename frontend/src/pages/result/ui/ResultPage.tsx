@@ -152,9 +152,8 @@ export function ResultPage() {
             </Box>
           </Box>
 
-          {/* ── Stats section ── */}
+          {/*Stats section*/}
           <Box sx={{ bgcolor: '#fff', p: { xs: 3, md: 4 } }}>
-            {/* Stats row */}
             <Box
               sx={{
                 display: 'flex',
@@ -190,7 +189,6 @@ export function ResultPage() {
               ))}
             </Box>
 
-            {/* Buttons */}
             <Stack spacing={1.5}>
               <Button
                 fullWidth

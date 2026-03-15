@@ -56,7 +56,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-# ── Database (PostgreSQL) ────────────────────────────────────────────────────
+# ── Database (PostgreSQL)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -68,7 +68,7 @@ DATABASES = {
     }
 }
 
-# ── Auth password validators ─────────────────────────────────────────────────
+# ── Auth password validators
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -76,19 +76,19 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# ── I18n ────────────────────────────────────────────────────────────────────
+# ── I18n
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# ── Static ───────────────────────────────────────────────────────────────────
+# ── Static
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# ── Django REST Framework ────────────────────────────────────────────────────
+# ── Django REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
@@ -98,10 +98,10 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 100,
 }
 
-# ── CORS ──────────────────────
+# ── CORS
 CORS_ALLOW_ALL_ORIGINS = True   # allow all origins (dev)
 
-# ── AI / Image generation ─────────────────────────────────────────────────────
+# ── AI / Image generation
 SCENARIO_SERVICE_URL = config('SCENARIO_SERVICE_URL', default='http://localhost:5467')
 IMAGE_SERVICE_URL    = config('IMAGE_SERVICE_URL',    default='ngrok')
 FRONTEND_PUBLIC_DIR  = config(
