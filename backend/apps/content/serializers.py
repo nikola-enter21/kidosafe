@@ -75,6 +75,7 @@ class ScenarioSerializer(serializers.ModelSerializer):
       scene_*            ↔  scene: { background, emoji, label }
     """
     watchTime = serializers.IntegerField(source='watch_time', required=False, default=4)
+    tip = serializers.CharField(required=False, allow_blank=True, default='')
     questionVideoUrl = serializers.CharField(
         source='question_video_url', required=False, allow_blank=True, default=''
     )
