@@ -65,11 +65,9 @@ class CategoryViewSet(viewsets.ModelViewSet):
             creates a new Scenario record with the new question + Choices.
         """
         category = self.get_object()
-
         # Fetch material JSON from the AI scenario service
         resp = http_requests.get(
-            f"{settings.SCENARIO_SERVICE_URL}/{category.id}/generate-scenario",
-            timeout=60,
+            f"{settings.SCENARIO_SERVICE_URL}/api/{category.id}/generate_scenario",
         )
         resp.raise_for_status()
 
@@ -276,7 +274,8 @@ def _bulk_create_choices(scenario: Scenario, answers: list, correct_idx: int) ->
         Choice(
             id=_choice_id(scenario.id),
             scenario=scenario,
-            text=answers[i],
+            text=answers[i]['text'],
+            feedback=answers[i].get('feedback', ''),
             is_correct=(i == correct_idx),
             order=i,
         )

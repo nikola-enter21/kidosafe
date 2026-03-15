@@ -102,8 +102,8 @@ REST_FRAMEWORK = {
 CORS_ALLOW_ALL_ORIGINS = True   # allow all origins (dev)
 
 # ── AI / Image generation ─────────────────────────────────────────────────────
-SCENARIO_SERVICE_URL = config('SCENARIO_SERVICE_URL', default='http://localhost:8001')
-IMAGE_SERVICE_URL    = config('IMAGE_SERVICE_URL',    default='http://localhost:5467')
+SCENARIO_SERVICE_URL = config('SCENARIO_SERVICE_URL', default='http://localhost:5467')
+IMAGE_SERVICE_URL    = config('IMAGE_SERVICE_URL',    default='ngrok')
 FRONTEND_PUBLIC_DIR  = config(
     'FRONTEND_PUBLIC_DIR',
     default=str(BASE_DIR.parent / 'frontend' / 'public'),

@@ -1,18 +1,15 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 import uvicorn
-import requests
-import numpy as np
 from embedding import *
-from agent import *
 from env import *
 from typing import Dict
 from agent import *
 
-app = FastAPI(title="KidoSafe AI Service", description="API for AI backend communication", port=5467)
+app = FastAPI(title="KidoSafe AI Service", description="API for AI backend communication")
 temperature = 0.2
 
-initialize_materials_and_embeddings()
+embeddings, materials, id_to_material = initialize_materials_and_embeddings()
 
 class UserRation(BaseModel):
     ratio: Dict[str, float]
@@ -21,12 +18,12 @@ class UserRation(BaseModel):
 def read_root():
     return {"status": "ok", "message": "AI Service is running"}
 
-@app.post("/api/categories/{category}/generate_scenario")
+@app.get("/api/{category}/generate_scenario")
 def generate_scenario(category: str):
     expand_category = expand_topic(category)
     generated_quiz = generate_safety_quiz(category + ": " + expand_category)
 
-    rel_doc = get_most_relevant_materials(generated_quiz.get("scenario"), top_k=1)
+    rel_doc = get_most_relevant_materials(generated_quiz.get("scenario"), embeddings=embeddings, id_to_material=id_to_material, top_k=1)
 
     if not rel_doc:
         image_prompts = generate_image_prompts(generated_quiz.get("scenario"), 
@@ -73,4 +70,4 @@ def get_next_category(ratio: UserRation):
     }
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=5467, reload=True)

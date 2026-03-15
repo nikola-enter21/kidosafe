@@ -201,13 +201,25 @@ class MaterialInputSerializer(serializers.Serializer):
     """
     id_material           = serializers.CharField(required=False, allow_null=True, allow_blank=True, default=None)
     question              = serializers.CharField()
-    answers               = serializers.ListField(child=serializers.CharField(), min_length=2)
-    correctAnswer         = serializers.IntegerField(min_value=0)
+    answers               = serializers.ListField(
+                              child=serializers.DictField(child=serializers.CharField()),
+                              min_length=2,
+                          )
+    correctAnswer         = serializers.IntegerField(min_value=0, required=False)
+    correct_answer        = serializers.IntegerField(min_value=0, required=False, write_only=True)
     question_image_prompt = serializers.CharField(required=False, allow_blank=True, default='')
     success_image_prompt  = serializers.CharField(required=False, allow_blank=True, default='')
     failure_image_prompt  = serializers.CharField(required=False, allow_blank=True, default='')
 
     def validate(self, data):
+        # Accept either camelCase (correctAnswer) or snake_case (correct_answer)
+        if 'correct_answer' in data and 'correctAnswer' not in data:
+            data['correctAnswer'] = data.pop('correct_answer')
+        elif 'correct_answer' in data:
+            data.pop('correct_answer')
+
+        if data.get('correctAnswer') is None:
+            raise serializers.ValidationError({'correctAnswer': 'This field is required.'})
         if data['correctAnswer'] >= len(data['answers']):
             raise serializers.ValidationError(
                 {'correctAnswer': 'Index out of range for the provided answers array.'}
