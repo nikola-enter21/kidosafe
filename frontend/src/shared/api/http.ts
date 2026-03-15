@@ -16,8 +16,8 @@ function resolveApiUrl(url: string) {
   return `${BASE_URL}${url.startsWith('/') ? url : `/${url}`}`
 }
 
-export const get = async <Response>(url: string): Promise<Response> => {
-  return ky(resolveApiUrl(url)).json<Response>()
+export const get = async <Response>(url: string, timeout?: number): Promise<Response> => {
+  return ky(resolveApiUrl(url), { timeout: timeout ?? 10_000 }).json<Response>()
 }
 
 export const post = async <Response, Data = unknown>(
