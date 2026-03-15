@@ -60,19 +60,18 @@ Follow these steps:
 1) Carefully read the scenario description. This describes the situation the child is currently facing.
 2) Review the additional story context to ensure visual consistency (characters, environment, and story elements). Avoid contradictions with previously established details.
 3) Examine the list of possible actions and identify the correct action using the provided index (answers are indexed starting from 0).
-4) Create a descriptive prompt for an image generation AI illustrating the moment just before the child decides what to do. This prompt will be labelled question_image_prompt.
-5) Generate a "description-prefix". The description-prefix is based on the contents of question_image_prompt and describes the entities in the scene. The purpose of the description-prefix is to provide context for the two prompts you'll generate in step 6. Both of these prompts will begin with this description-prefix.
-6) Create two descriptive prompts for an image generation AI (both prompts must contain the entire content of the description-prefix before anything else):
-   - One illustrating the child performing the correct action itself (not the outcome). This prompt will be labeled success_image_prompt.
-   - One illustrating the same situation as the first image but with the child visibly upset after making a wrong choice. This prompt will be labeled failure_image_prompt.
+4) Plan out three scenes you'll be generating an image generation prompt for. The scenes are:
+- The situation immediately prior to the child making a choice.
+- The child actively carrying out the correct action.
+- The child in the situation prior to making a choice, but visibly upset
+5) Identify the common elements in the three scene. These includes things like the environment, as well as individual characters and their descriptions. Generate a prompt describing these common elements. SAVE THIS PROMPT AS AN INTERNAL VARIABLE, WORD FOR WORD, NAMED scene_description.
+6) Perform this step individually for each scene: Generate an image generation prompt for the scene. The prompt should begin with the ENTIRE CONTENTS of the scene_description variable. Extend the prompt with additional detail unique for the scene.
+7) Format the three prompts you've generated as per the output requirements below.
 
 Image prompt guidelines:
-- Describe the environment, characters, expressions, body language, and important objects.
 - Keep the tone safe, calm, and appropriate for children ages 5–10.
 - Avoid frightening, violent, or graphic imagery.
 - Use simple, clear visual storytelling suitable for educational materials.
-- Each prompt should stipulate that the generated image must be in landscape ratio.
-- Any context provided by the question_image_prompt for the latter two prompts must come from the description-prefix.
 
 Output Requirements:
 Return ONLY a valid JSON object with exactly three fields and no additional text.

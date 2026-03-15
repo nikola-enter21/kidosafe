@@ -288,7 +288,7 @@ if __name__ == "__main__":
     # Step 1: generate the opening scenario
     print(f"Step 1 — Generating opening quiz for topic: '{topic}'\n")
     opening = generate_safety_quiz(topic)
-    print(json.dumps(opening, indent=2))
+    print(json.dumps(opening, indent=2, ensure_ascii=False))
 
     # Step 2: use the correct answer to continue the story
     correct_answer = opening["answers"][opening["correct_answer"]]
@@ -300,7 +300,7 @@ if __name__ == "__main__":
         response=correct_answer,
         context=opening["context"],
     )
-    print(json.dumps(continuation, indent=2))
+    print(json.dumps(continuation, indent=2, ensure_ascii=False))
 
     # Step 3: generate image prompts for the continuation scenario
     print(f"\nStep 3 — Generating image prompts\n")
@@ -310,4 +310,5 @@ if __name__ == "__main__":
         answers=continuation["answers"],
         correct_answer=continuation["correct_answer"],
     )
+    print(f"\nHYPOTHESIS\n")
     print(json.dumps(image_prompts, indent=2, ensure_ascii=False))
