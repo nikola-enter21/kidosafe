@@ -58,7 +58,7 @@ class Scenario(models.Model):
     watch_time = models.PositiveSmallIntegerField(
         default=4, help_text='Seconds to watch before choices unlock (2–15)'
     )
-    tip = models.TextField(help_text='Safety advice shown after answering')
+    tip = models.TextField(blank=True, default='', help_text='Safety advice shown after answering')
     question_video_url = models.CharField(
         max_length=500,
         blank=True,
