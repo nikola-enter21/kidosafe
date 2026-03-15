@@ -112,6 +112,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
                 image_url=image_paths.get('question', ''),
                 image_url_correct=image_paths.get('success', ''),
                 image_url_wrong=image_paths.get('failure', ''),
+                description=data.get('question_image_prompt', ''),
             )
 
         _bulk_create_choices(scenario, data['answers'], data['correctAnswer'])
