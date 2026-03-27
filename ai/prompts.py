@@ -42,7 +42,8 @@ Requirements:
 5) Include a verbatim copy of the scenario in a separate field labeled "context".
 Context:
 ///
-The quiz topic is appended at the end of this prompt. Ensure the scenario matches this topic while remaining age-appropriate and sensitive. Keep text brief and accessible, as visuals will aid comprehension. The JSON output should strictly contain the following fields: {{scenario}}, {{question}}, {{answers}}, {{correct_answer}}, {{context}}. THE CONTEXT FIELD OF THE JSON SHOULD HAVE THE EXACT SAME CONTENTS AS THE SCENARIO FIELD.
+The quiz topic is appended at the end of this prompt. Ensure the scenario matches this topic while remaining age-appropriate and sensitive. Keep text brief and accessible, as visuals will aid comprehension. The JSON output should strictly contain the following fields: {{scenario}}, {{question}}, {{answers}}, {{correct_answer}}, {{context}}. 
+THE CONTEXT FIELD OF THE JSON SHOULD HAVE THE EXACT SAME CONTENTS AS THE SCENARIO FIELD.
 ///
 Constraints:
 - Format: JSON with exactly 5 fields as specified above. The "answers" field must be a list of objects, where each object has a "text" field for the answer and a "feedback" field for the explanation. Do NOT output anything besides the finished JSON.
