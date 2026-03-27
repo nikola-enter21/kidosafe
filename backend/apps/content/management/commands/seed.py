@@ -13,11 +13,6 @@ Options:
 from django.core.management.base import BaseCommand
 from apps.content.models import Category, Scenario, Choice
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Categories — exact match with frontend/src/entities/scenario/model/categories.ts
-# ─────────────────────────────────────────────────────────────────────────────
-
 CATEGORIES = [
     {
         'id': 'home-alone',
@@ -58,16 +53,8 @@ CATEGORIES = [
 ]
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Scenarios — all 20, exact IDs matching frontend/public/content/scenarios.v1.json
-# Each entry: (category_id, scenario_dict, list_of_choice_dicts)
-# ─────────────────────────────────────────────────────────────────────────────
-
 SCENARIOS = [
 
-    # ═══════════════════════════════════════════════════
-    # HOME ALONE  (ha-1 … ha-5)
-    # ═══════════════════════════════════════════════════
     ('home-alone', {
         'id': 'ha-1',
         'question': 'You smell smoke coming from the kitchen. What do you do?',
@@ -134,9 +121,7 @@ SCENARIOS = [
         {'id': 'ha-5-c', 'text': 'Use it to cut fruit',              'emoji': '🍎', 'is_correct': False, 'feedback': 'Knives are very dangerous for kids. Always ask an adult for help!',            'feedback_emoji': '❌', 'order': 2},
     ]),
 
-    # ═══════════════════════════════════════════════════
-    # STRANGER SAFETY  (st-1 … st-5)
-    # ═══════════════════════════════════════════════════
+
     ('stranger', {
         'id': 'st-1',
         'question': 'A stranger is holding out candy and wants you to come closer. What do you do?',
@@ -203,9 +188,7 @@ SCENARIOS = [
         {'id': 'st-5-c', 'text': 'Ask them to prove it',          'emoji': '🤔', 'is_correct': False, 'feedback': 'Good instinct to question! But always get your teacher involved and call your parent.',                'feedback_emoji': '⚠️', 'order': 2},
     ]),
 
-    # ═══════════════════════════════════════════════════
-    # INTERNET SAFETY  (in-1 … in-5)
-    # ═══════════════════════════════════════════════════
+
     ('internet', {
         'id': 'in-1',
         'question': 'An online friend asks: "What is your home address?" What do you do?',
@@ -272,9 +255,7 @@ SCENARIOS = [
         {'id': 'in-5-c', 'text': 'Tell only your best friend',      'emoji': '👫',  'is_correct': False, 'feedback': 'Your parent needs to know! They will help keep you safe. Always tell a trusted adult.',   'feedback_emoji': '⚠️', 'order': 2},
     ]),
 
-    # ═══════════════════════════════════════════════════
-    # SCHOOL SAFETY  (sc-1 … sc-5)
-    # ═══════════════════════════════════════════════════
+
     ('school', {
         'id': 'sc-1',
         'question': 'The fire alarm goes off during class. What do you do?',
@@ -343,10 +324,6 @@ SCENARIOS = [
 ]
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Command
-# ─────────────────────────────────────────────────────────────────────────────
-
 class Command(BaseCommand):
     help = 'Seed the database with all 4 categories and 20 scenarios'
 
@@ -373,7 +350,6 @@ class Command(BaseCommand):
             Scenario.objects.all().delete()
             Category.objects.all().delete()
 
-        # ── Seed categories ──────────────────────────────────────────────
         self.stdout.write('Seeding categories…')
         for cat_data in CATEGORIES:
             cat, created = Category.objects.update_or_create(
@@ -383,7 +359,6 @@ class Command(BaseCommand):
             status = '✅ created' if created else '🔄 updated'
             self.stdout.write(f'  {cat.emoji} {cat.label} — {status}')
 
-        # ── Seed scenarios & choices ─────────────────────────────────────
         self.stdout.write('Seeding scenarios…')
         for cat_id, sc_data, choices_data in SCENARIOS:
             try:
@@ -395,7 +370,6 @@ class Command(BaseCommand):
             sc_payload = dict(sc_data)
             sc_id = sc_payload.pop('id')
 
-            # Support legacy seed entries that still use video_url/image_url.
             legacy_video_url = sc_payload.pop('video_url', '')
             sc_payload.pop('image_url', None)
             if legacy_video_url and not sc_payload.get('question_video_url'):
@@ -411,7 +385,6 @@ class Command(BaseCommand):
             status = '✅ created' if created else '🔄 updated'
             self.stdout.write(f'  [{cat_id}] {sc_id} — {status}')
 
-            # Always replace choices to stay in sync with seed data
             scenario.choices.all().delete()
             for choice_data in choices_data:
                 Choice.objects.create(scenario=scenario, **choice_data)

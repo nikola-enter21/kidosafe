@@ -12,7 +12,7 @@ interface SceneDisplayProps {
 }
 
 export function SceneDisplay({ scene, videoUrl, imageUrl, shouldPause = false }: SceneDisplayProps) {
-  // ── Video mode ────────────────────────────────────────────────────────────
+
   if (videoUrl) {
     return (
       <VideoScene
@@ -24,7 +24,6 @@ export function SceneDisplay({ scene, videoUrl, imageUrl, shouldPause = false }:
     )
   }
 
-  // ── Image mode ────────────────────────────────────────────────────────────
   if (imageUrl) {
     return (
       <Box
@@ -44,7 +43,7 @@ export function SceneDisplay({ scene, videoUrl, imageUrl, shouldPause = false }:
     )
   }
 
-  // ── Emoji / placeholder mode ──────────────────────────────────────────────
+
   return (
     <Box
       sx={{
@@ -79,7 +78,7 @@ export function SceneDisplay({ scene, videoUrl, imageUrl, shouldPause = false }:
   )
 }
 
-// ── VideoScene component ────────────────────────────────────────────────────
+
 interface VideoSceneProps {
   videoUrl: string
   label: string
@@ -117,7 +116,6 @@ function VideoScene({ videoUrl, label, shouldPause }: VideoSceneProps) {
     }
   }, [shouldPause])
 
-  // Unmute on user tap (fallback for browsers that blocked audio)
   const handleUnmute = () => {
     const vid = videoRef.current
     if (!vid) return
@@ -137,7 +135,6 @@ function VideoScene({ videoUrl, label, shouldPause }: VideoSceneProps) {
         <source src={videoUrl} type="video/webm" />
       </video>
 
-      {/* Tap-to-unmute button — shows only when browser blocked audio */}
       {soundBlocked && !shouldPause && (
         <Box
           onClick={handleUnmute}
@@ -161,7 +158,6 @@ function VideoScene({ videoUrl, label, shouldPause }: VideoSceneProps) {
         </Box>
       )}
 
-      {/* Freeze overlay when choices are showing */}
       {shouldPause && (
         <Box
           sx={{
@@ -177,7 +173,7 @@ function VideoScene({ videoUrl, label, shouldPause }: VideoSceneProps) {
   )
 }
 
-// ── Label chip ──────────────────────────────────────────────────────────────
+
 function SceneLabel({ label }: { label: string }) {
   return (
     <Box

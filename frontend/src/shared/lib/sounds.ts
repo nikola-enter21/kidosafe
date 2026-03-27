@@ -1,4 +1,4 @@
-// Lightweight Web Audio API sound generator — no external files needed
+
 
 let ctx: AudioContext | null = null
 

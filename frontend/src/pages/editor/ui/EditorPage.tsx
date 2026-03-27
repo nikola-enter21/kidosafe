@@ -561,7 +561,6 @@ export function EditorPage() {
                 Triplet video flow requires all 3 fields: question + wrong + correct.
               </Typography>
 
-              {/* ── Description ───────────────────────────────────────── */}
               <TextField
                 label="Description"
                 multiline
@@ -581,7 +580,7 @@ export function EditorPage() {
                 }}
               />
 
-              {/* ── Image triplet fields ──────────────────────────────── */}
+              {/* ── Image triplet fields */}
               <Typography sx={{ fontWeight: 700, fontSize: '0.85rem', color: 'rgba(255,255,255,0.8)', mt: 0.5 }}>
                 🖼️ Image URLs (optional — shown when no video is set)
               </Typography>
@@ -642,7 +641,6 @@ export function EditorPage() {
                       gap: 1,
                     }}
                   >
-                    {/* Row 1: Radio + Answer text + Feedback emoji */}
                     <Stack direction="row" spacing={1} alignItems="center">
                       <Radio
                         checked={choice.isCorrect}
@@ -667,21 +665,8 @@ export function EditorPage() {
                           '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.65)' },
                         }}
                       />
-                      {/*<TextField*/}
-                      {/*  label="Emoji"*/}
-                      {/*  value={choice.feedbackEmoji}*/}
-                      {/*  onChange={event => updateChoiceField(index, 'feedbackEmoji', event.target.value)}*/}
-                      {/*  sx={{*/}
-                      {/*    width: 86,*/}
-                      {/*    flexShrink: 0,*/}
-                      {/*    '& .MuiInputBase-root': { color: '#fff', bgcolor: 'rgba(255,255,255,0.03)', fontSize: '1.2rem' },*/}
-                      {/*    '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.65)' },*/}
-                      {/*  }}*/}
-                      {/*  inputProps={{ maxLength: 4 }}*/}
-                      {/*/>*/}
                     </Stack>
 
-                    {/* Row 2: Feedback message */}
                     <Box sx={{ pl: '44px' }}>
                       <TextField
                         label={`Feedback — ${choice.isCorrect ? 'Correct ✅' : 'Wrong ❌'}`}

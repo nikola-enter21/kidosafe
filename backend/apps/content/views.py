@@ -119,10 +119,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
         return Response(ScenarioSerializer(scenario).data, status=status.HTTP_201_CREATED)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
 # Scenario
-# ─────────────────────────────────────────────────────────────────────────────
-
 class ScenarioViewSet(viewsets.ModelViewSet):
     """
     CRUD for scenarios.
@@ -152,8 +149,6 @@ class ScenarioViewSet(viewsets.ModelViewSet):
             return ScenarioListSerializer
         return ScenarioSerializer
 
-    # ── Nested choices actions ────────────────────────────────────────────
-
     @action(detail=True, methods=['get', 'post'], url_path='choices')
     def choices(self, request, pk=None):
         scenario = self.get_object()
@@ -163,16 +158,13 @@ class ScenarioViewSet(viewsets.ModelViewSet):
             serializer = ChoiceSerializer(qs, many=True)
             return Response(serializer.data)
 
-        # POST – add a single choice
         serializer = ChoiceSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        # validated_data has snake_case keys from 'source' mappings
+
         vd = serializer.validated_data
         choice = Choice.objects.create(scenario=scenario, **vd)
         out = ChoiceSerializer(choice)
         return Response(out.data, status=status.HTTP_201_CREATED)
-
-    # ── Bulk choices replacement ──────────────────────────────────────────
 
     @action(detail=True, methods=['put'], url_path='choices/bulk')
     def choices_bulk(self, request, pk=None):
@@ -198,7 +190,7 @@ class ScenarioViewSet(viewsets.ModelViewSet):
         out = ChoiceSerializer(qs, many=True)
         return Response(out.data)
 
-    # ── Export (full dataset for frontend) ───────────────────────────────
+    # ── Export (full dataset for frontend)
 
     @action(detail=False, methods=['get'], url_path='export')
     def export(self, request):
@@ -220,10 +212,7 @@ class ScenarioViewSet(viewsets.ModelViewSet):
         })
 
 
-# ─────────────────────────────────────────────────────────────────────────────
 # Choice
-# ─────────────────────────────────────────────────────────────────────────────
-
 class ChoiceViewSet(viewsets.ModelViewSet):
     """
     CRUD for individual choices (direct access without scenario nesting).
@@ -265,10 +254,8 @@ class ChoiceViewSet(viewsets.ModelViewSet):
         return Response(out.data, status=status.HTTP_201_CREATED)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Helpers
-# ─────────────────────────────────────────────────────────────────────────────
 
+# Helpers
 def _bulk_create_choices(scenario: Scenario, answers: list, correct_idx: int) -> None:
     """Create Choice records for a scenario from a flat answers list."""
     Choice.objects.bulk_create([
@@ -284,10 +271,7 @@ def _bulk_create_choices(scenario: Scenario, answers: list, correct_idx: int) ->
     ])
 
 
-# ─────────────────────────────────────────────────────────────────────────────
 # Descriptions
-# ─────────────────────────────────────────────────────────────────────────────
-
 class GetDescriptionsView(APIView):
     """
     GET /api/get_descriptions
